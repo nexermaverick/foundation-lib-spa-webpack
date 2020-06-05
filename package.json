@@ -1,0 +1,18 @@
+{
+    "name": "@episerver/webpack",
+    "version": "0.0.1",
+    "description": "Episerver React SPA - Webpack add-ons",
+    "homepage": "https://github.com/episerver/foundation-lib-spa-webpack",
+    "bugs": "https://github.com/episerver/foundation-lib-spa-webpack/issues",
+    "private": true,
+    "author": "Episerver SA Team",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "glob": "^7.1.4",
+        "loader-utils": "^1.2.3",
+        "schema-utils": "^2.6.1",
+        "dotenv": "^8.2.0"
+    },
+    "devDependencies": {
+    }
+}
