@@ -5,7 +5,6 @@ This library contains the Webpack add-ons to build, bundle and distribute an Epi
 You can request a demo of the project by one of our Episerver experts on [Get a demo](https://www.episerver.com/get-a-demo/).
 
 [![License](https://img.shields.io/:license-apache-blue.svg?style=flat-square)](http://www.apache.org/licenses/LICENSE-2.0.html)
-![Typescript](https://img.shields.io/npm/types/typescript?style=flat-square)
 ***
 
 ## Table of Contents  <!-- omit in toc -->
