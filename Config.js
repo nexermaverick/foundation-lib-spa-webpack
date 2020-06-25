@@ -185,11 +185,17 @@ class GlobalConfig {
         return resolveConfig;
     }
 
+    /**
+     * Create a list of NodeJS variables that will be replaced by their value
+     * during the build process. This "fixates" the value in run-time. 
+     * 
+     * @param {object} envOverrides A list of overrides for the environment variables
+     * @returns {object} The configuration for the Webpack Define Plugin
+     */
     getDefineConfig(envOverrides = {})
     {
         return {
             'process.env.NODE_ENV': JSON.stringify(this.getNodeEnv(envOverrides)),
-            'process.env.DEBUG': JSON.stringify(this.getEnvVariable("DEBUG","1",envOverrides)),
             'process.env.EPI_URL': JSON.stringify(this.getEnvVariable("EPI_URL","/",envOverrides)),
             'process.env.WEB_PATH': JSON.stringify(this.getWebPath())
         }
