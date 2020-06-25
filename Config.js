@@ -1,6 +1,11 @@
 const path = require('path');
 const dotenv = require('dotenv');
 
+/**
+ * Episerver SPA Configuration helper, to easily create Webpack config files,
+ * which are using a .env file to store environment specific configuration 
+ * values.
+ */
 class GlobalConfig {
     /**
      * Stored root directory of the SPA
@@ -9,27 +14,96 @@ class GlobalConfig {
      * @var string
      */
     _rootDir = null;
-    
-    constructor(rootDir) {
+
+    /**
+     * Local overrides for the environment
+     * 
+     * @private
+     * @var object
+     */
+    _localOverrides = {};
+
+    /**
+     * Local copy of the environment
+     * 
+     * @private
+     * @var object
+     */
+    _myEnv = {};
+
+    /**
+     * Create a new configuration helper for the current context
+     * 
+     * @param {string} rootDir The root path of the application
+     * @param {object} localOverrides The environment variables set by the Webpack CLI
+     */
+    constructor(rootDir, localOverrides = {}) {
         this._rootDir = rootDir;
-        dotenv.config({path: this.__dirname});
+        this._localOverrides = localOverrides;
+        dotenv.config({path: path.join(this._rootDir, '.env')});
+        Object.assign(this._myEnv, process.env, this._localOverrides);
     }
 
+     /**
+     * Retrieve the path were the code for the Episerver SPA Server Side
+     * Rendering can be found, relative to the current path
+     * 
+     * Environment variable: SERVER_PATH 
+     * 
+     * @public
+     * @param {object} localEnvironment     The local overrides, if not already specified or different from the constructor
+     * @param {string} defaultValue         The default value if not set - by default 'server'
+     * @returns {string}
+     */
     getServerPath(localEnvironment = {}, defaultValue = 'server')
     {
         return this.getEnvVariable('SERVER_PATH', defaultValue, localEnvironment);
     }
 
+    /**
+     * The path within the main Episerver site where the SPA needs to be 
+     * placed. This value shall used both in building the file target path
+     * as well as the web path for the resources.
+     * 
+     * Environment variable: SPA_PATH 
+     * 
+     * @public
+     * @param {object} localEnvironment     The local overrides, if not already specified or different from the constructor
+     * @param {string} defaultValue         The default value if not set - by default 'spa'
+     * @returns {string}
+     */
     getSpaPath(localEnvironment = {}, defaultValue = 'Spa')
     {
         return this.getEnvVariable('SPA_PATH', defaultValue, localEnvironment);
     }
 
+    /**
+     * The path - relative to the current path - where the main Episerver 
+     * project is located.
+     * 
+     * Environment variable: EPI_PATH 
+     * 
+     * @public
+     * @param {object} localEnvironment     The local overrides, if not already specified or different from the constructor
+     * @param {string} defaultValue         The default value if not set - by default '../Foundation'
+     * @returns {string}
+     */
     getEpiPath(localEnvironment = {}, defaultValue = '../Foundation')
     {
         return this.getEnvVariable('EPI_PATH', defaultValue, localEnvironment);
     }
 
+    /**
+     * The path at which the application will be running, relative to the 
+     * domain
+     * 
+     * Environment variable: WEB_PATH 
+     * 
+     * @public
+     * @param {object} localEnvironment     The local overrides, if not already specified or different from the constructor
+     * @param {string} defaultValue         The default value if not set - by default '/'
+     * @returns {string}
+     */
     getWebPath(localEnvironment = {}, defaultValue = '/')
     {
         return this.getEnvVariable('WEB_PATH', defaultValue, localEnvironment);
@@ -50,7 +124,7 @@ class GlobalConfig {
         return this.getEnvVariable('EXPRESS_PATH', defaultValue, localEnvironment);
     }
 
-    getEpiserverFormsDir(localEnvironment = {}, defaultValue = '../Foundation/Scripts/EPiServer.ContentApi.Forms')
+    getEpiserverFormsDir(localEnvironment = {}, defaultValue = 'Scripts/EPiServer.ContentApi.Forms')
     {
         return this.getEnvVariable('EPI_FORMS_PATH', defaultValue, localEnvironment)
     }
@@ -65,6 +139,24 @@ class GlobalConfig {
     }
 
     /**
+     * Retrieve the URL at which Episerver is running, always ending with a 
+     * slash. This shall be used to connect to Episerver by the application,
+     * this URL could be different from the URL where the application runs.
+     * 
+     * @public
+     * @param {object} localEnvironment Additional environment overrides to those provided in the constructor
+     * @param {string} defaultValue     The default value if none set by the environment
+     * @returns {string}
+     */
+    getEpiserverURL(localEnvironment = {}, defaultValue = '/') {
+        let base_url = this.getEnvVariable('EPI_URL', defaultValue, localEnvironment);
+        if (base_url.substr(-1) !== '/') {
+            base_url = base_url + '/';
+        }
+        return base_url;
+    }
+
+    /**
      * Generate the resolve configuration for Webpack
      * 
      * @public
@@ -72,7 +164,6 @@ class GlobalConfig {
      * @returns {object}    The Resolve configuration for Webpack
      */
     getResolveConfig(envOverrides = undefined) {
-        const libDir = path.resolve(this._rootDir, this.getLibPath(envOverrides));
         const srcDir = path.resolve(this._rootDir, this.getSourcePath(envOverrides));
         const serverDir = path.resolve(this._rootDir, this.getServerPath(envOverrides));
         const expressDir = path.resolve(this._rootDir, this.getExpressPath(envOverrides));
@@ -114,7 +205,8 @@ class GlobalConfig {
      * @returns {string}                The value of the environment variable, or the defaultValue if it evaluates to false
      */
     getEnvVariable(key, defaultValue = null, overrides = undefined) {
-        let env = overrides ? Object.assign({}, process.env, overrides) : process.env;
+        
+        let env = overrides ? Object.assign({}, this._myEnv, overrides) : this._myEnv;
         return env[key] || defaultValue
     } 
 }

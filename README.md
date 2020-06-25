@@ -10,6 +10,8 @@ You can request a demo of the project by one of our Episerver experts on [Get a 
 ## Table of Contents  <!-- omit in toc -->
 - [1. Introduction](#1-introduction)
 - [2. Installation](#2-installation)
+- [3. Environment configuration](#3-environment-configuration)
+  - [Example usage](#example-usage)
 
 ***
 
@@ -19,4 +21,36 @@ To create an optimized build of the Episerver React based SPA, a number of steps
 ## 2. Installation
 ```
 npm install --save-dev git+https://github.com/episerver/foundation-lib-spa-webpack.git
+```
+
+## 3. Environment configuration
+This library provides a configuration helper, which enables you to use a .env
+file to ensure no environment specific values (paths, credentials, etc..) are
+committed to your source control system of choice. Do include a .env.dist file
+with sane defaults for your project.
+
+Both the .js and .d.ts file contain the inline documentation needed to use the
+class.
+
+### Example usage
+
+Use inside the Webpack config file to build an .env based build (for example: `webpack.config.js`):
+```javascript
+const GlobalConfig = require('@episerver/webpack/Config');
+
+module.exports = (env) => {
+    //Prepare configuration
+    /** @type {GlobalConfig} */
+    const config = new GlobalConfig(__dirname, env);
+    
+    //Only excerpt shown to illustrate working principle
+    return {
+        devServer: {
+            port: config.getEnvVariable("DEV_PORT", "9000")
+        },
+        output: {
+			publicPath: config.getWebPath()
+        }
+    }
+}
 ```
