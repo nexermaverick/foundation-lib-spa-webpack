@@ -18,7 +18,7 @@ declare class GlobalConfig {
      * @param {string} rootDir          The root path of the application
      * @param {object} localOverrides   The environment variables set by the Webpack CLI
      */
-    constructor(rootDir: string, localOverrides: object = {});
+    constructor(rootDir: string, localOverrides?: object);
 
     /**
      * Retrieve the path were the code for the Episerver SPA Server Side
@@ -31,7 +31,7 @@ declare class GlobalConfig {
      * @param {string} defaultValue         The default value if not set - by default 'server'
      * @returns {string}
      */
-    getServerPath(localEnvironment: object = {}, defaultValue: string = 'server') : string
+    getServerPath(localEnvironment?: object, defaultValue?: string) : string
 
     /**
      * The path within the main Episerver site where the SPA needs to be 
@@ -45,7 +45,7 @@ declare class GlobalConfig {
      * @param {string} defaultValue         The default value if not set - by default 'spa'
      * @returns {string}
      */
-    getSpaPath(localEnvironment: object = {}, defaultValue: string = 'Spa') : string
+    getSpaPath(localEnvironment?: object, defaultValue?: string) : string
 
     /**
      * The path - relative to the current path - where the main Episerver 
@@ -58,7 +58,7 @@ declare class GlobalConfig {
      * @param {string} defaultValue         The default value if not set - by default '../Foundation'
      * @returns {string}
      */
-    getEpiPath(localEnvironment: object = {}, defaultValue: string = '../Foundation') : string
+    getEpiPath(localEnvironment?: object, defaultValue?: string) : string
 
     /**
      * The path at which the application will be running, relative to the 
@@ -71,13 +71,13 @@ declare class GlobalConfig {
      * @param {string} defaultValue         The default value if not set - by default '/'
      * @returns {string}
      */
-    getWebPath(localEnvironment: object = {}, defaultValue: string = '/') : string
-    getLibPath(localEnvironment: object = {}, defaultValue: string = 'lib') : string
-    getSourcePath(localEnvironment: object = {}, defaultValue: string = 'src') : string
-    getExpressPath(localEnvironment: object = {}, defaultValue: string = 'express') : string
-    getEpiserverFormsDir(localEnvironment: object = {}, defaultValue: string = 'Scripts/EPiServer.ContentApi.Forms') : string
-    getNodeEnv(localEnvironment: object = {}, defaultValue: string = 'development') : string
-    isEpiserverFormsEnabled(localEnvironment: object = {}, defaultValue: string = 'false') : string
+    getWebPath(localEnvironment?: object, defaultValue?: string) : string
+    getLibPath(localEnvironment?: object, defaultValue?: string) : string
+    getSourcePath(localEnvironment?: object, defaultValue?: string) : string
+    getExpressPath(localEnvironment?: object, defaultValue?: string) : string
+    getEpiserverFormsDir(localEnvironment?: object, defaultValue?: string) : string
+    getNodeEnv(localEnvironment?: object, defaultValue?: string) : string
+    isEpiserverFormsEnabled(localEnvironment?: object, defaultValue?: string) : string
 
     /**
      * Retrieve the URL at which Episerver is running, always ending with a 
@@ -89,7 +89,7 @@ declare class GlobalConfig {
      * @param {string} defaultValue     The default value if none set by the environment
      * @returns {string}
      */
-    getEpiserverURL(localEnvironment: object = {}, defaultValue: string = '/') : string
+    getEpiserverURL(localEnvironment?: object, defaultValue?: string) : string
 
     /**
      * Generate the resolve configuration for Webpack
@@ -98,8 +98,8 @@ declare class GlobalConfig {
      * @param   {object}    envOverrides    The Environment overrides through the Webpack CLI
      * @returns {object}    The Resolve configuration for Webpack
      */
-    getResolveConfig(envOverrides: object = undefined) : object
-    getDefineConfig(envOverrides: object = {}) : object
+    getResolveConfig(envOverrides?: object) : object
+    getDefineConfig(envOverrides?: object) : object
 
     /**
      * Read a value from the NodeJS Environment
@@ -110,5 +110,5 @@ declare class GlobalConfig {
      * @param {object} overrides        Overrides for the environment
      * @returns {string}                The value of the environment variable, or the defaultValue if it evaluates to false
      */
-    getEnvVariable(key : string, defaultValue : string = null, overrides : object = undefined) : string
+    getEnvVariable(key: string, defaultValue?: string, overrides?: object) : string
 }
