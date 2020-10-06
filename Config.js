@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
 
 /**
@@ -164,16 +165,26 @@ class GlobalConfig {
      * @returns {object}    The Resolve configuration for Webpack
      */
     getResolveConfig(envOverrides = undefined) {
-        const srcDir = path.resolve(this._rootDir, this.getSourcePath(envOverrides));
-        const serverDir = path.resolve(this._rootDir, this.getServerPath(envOverrides));
-        const expressDir = path.resolve(this._rootDir, this.getExpressPath(envOverrides));
+
+        const tsConfigFile = path.resolve(this._rootDir, this.getEnvVariable('TS_CONFIG_FILE', 'tsconfig.json', envOverrides));
+        const alias = {};
+        if (fs.existsSync(tsConfigFile)) {
+            console.log('Building resolve configuration from TypeScript config file: ', tsConfigFile);
+            const tsConfig = JSON.parse(fs.readFileSync(tsConfigFile));
+            var paths = (tsConfig.compilerOptions || {}).paths || {};
+            for (var prefix in paths) {
+                var webpackPrefix = prefix.replace(/[\/\\]\*$/,'');
+                let prefixPath = Array.isArray(paths[prefix]) ? paths[prefix][0] : (typeof(paths[prefix]) === "string" ? paths[prefix] : "");
+                alias[webpackPrefix] = path.resolve(this._rootDir, prefixPath.replace(/[\/\\]\*$/,''));
+            }
+        } else {
+            alias["app"] = path.resolve(this._rootDir, this.getSourcePath(envOverrides));
+            alias["app.server"] = path.resolve(this._rootDir, this.getServerPath(envOverrides));
+            alias["app.express"] = path.resolve(this._rootDir, this.getExpressPath(envOverrides));
+        }
 
         const resolveConfig = {
-            alias: {
-                "app": srcDir,
-                "app.server": serverDir,
-                "app.express": expressDir
-            },
+            alias: alias,
             extensions: ['.js', '.jsx', '.json', '.tsx', '.ts']
         };
 
