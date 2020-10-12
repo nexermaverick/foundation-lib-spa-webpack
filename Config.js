@@ -172,10 +172,11 @@ class GlobalConfig {
             console.log('Building resolve configuration from TypeScript config file: ', tsConfigFile);
             const tsConfig = JSON.parse(fs.readFileSync(tsConfigFile));
             var paths = (tsConfig.compilerOptions || {}).paths || {};
+            var baseUrl = (tsConfig.compilerOptions || {}).baseUrl || '';
             for (var prefix in paths) {
                 var webpackPrefix = prefix.replace(/[\/\\]\*$/,'');
                 let prefixPath = Array.isArray(paths[prefix]) ? paths[prefix][0] : (typeof(paths[prefix]) === "string" ? paths[prefix] : "");
-                alias[webpackPrefix] = path.resolve(this._rootDir, prefixPath.replace(/[\/\\]\*$/,''));
+                alias[webpackPrefix] = path.resolve(this._rootDir, baseUrl, prefixPath.replace(/[\/\\]\*$/,''));
             }
         } else {
             alias["app"] = path.resolve(this._rootDir, this.getSourcePath(envOverrides));
