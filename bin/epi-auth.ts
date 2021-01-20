@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // Import native Node.JS libraries
 import readline from 'readline';
 import crypto from 'crypto';
