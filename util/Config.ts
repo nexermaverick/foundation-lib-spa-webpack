@@ -1,20 +1,29 @@
-const path = require('path');
-const fs = require('fs');
-const dotenv = require('dotenv');
+import path from 'path';
+import fs from 'fs';
+import dotenv, { DotenvParseOutput } from 'dotenv';
+
+type ResolveAliasConfig = {
+    [ alias: string ] : string
+}
+
+type ResolveConfig = {
+    alias: ResolveAliasConfig,
+    extensions: string[]
+}
 
 /**
  * Episerver SPA Configuration helper, to easily create Webpack config files,
  * which are using a .env file to store environment specific configuration 
  * values.
  */
-class GlobalConfig {
+export class GlobalConfig {
     /**
      * Stored root directory of the SPA
      * 
      * @private
      * @var string
      */
-    _rootDir = null;
+    private _rootDir : string;
 
     /**
      * Local overrides for the environment
@@ -22,23 +31,23 @@ class GlobalConfig {
      * @private
      * @var object
      */
-    _localOverrides = {};
+    private _localOverrides : DotenvParseOutput = {};
 
     /**
      * Local copy of the environment
      * 
      * @private
-     * @var object
+     * @var DotenvParseOutput
      */
-    _myEnv = {};
+    private _myEnv : DotenvParseOutput = {};
 
     /**
      * Create a new configuration helper for the current context
      * 
      * @param {string} rootDir The root path of the application
-     * @param {object} localOverrides The environment variables set by the Webpack CLI
+     * @param {DotenvParseOutput} localOverrides The environment variables set by the Webpack CLI
      */
-    constructor(rootDir, localOverrides = {}) {
+    public constructor(rootDir: string, localOverrides: DotenvParseOutput = {}) {
         this._rootDir = rootDir;
         this._localOverrides = localOverrides;
         dotenv.config({path: path.join(this._rootDir, '.env')});
@@ -52,11 +61,11 @@ class GlobalConfig {
      * Environment variable: SERVER_PATH 
      * 
      * @public
-     * @param {object} localEnvironment     The local overrides, if not already specified or different from the constructor
+     * @param {DotenvParseOutput} localEnvironment     The local overrides, if not already specified or different from the constructor
      * @param {string} defaultValue         The default value if not set - by default 'server'
      * @returns {string}
      */
-    getServerPath(localEnvironment = {}, defaultValue = 'server')
+    public getServerPath(localEnvironment: DotenvParseOutput = {}, defaultValue: string = 'server'): string
     {
         return this.getEnvVariable('SERVER_PATH', defaultValue, localEnvironment);
     }
@@ -69,11 +78,11 @@ class GlobalConfig {
      * Environment variable: SPA_PATH 
      * 
      * @public
-     * @param {object} localEnvironment     The local overrides, if not already specified or different from the constructor
+     * @param {DotenvParseOutput} localEnvironment     The local overrides, if not already specified or different from the constructor
      * @param {string} defaultValue         The default value if not set - by default 'spa'
      * @returns {string}
      */
-    getSpaPath(localEnvironment = {}, defaultValue = 'Spa')
+    public getSpaPath(localEnvironment: DotenvParseOutput = {}, defaultValue: string = 'Spa'): string
     {
         return this.getEnvVariable('SPA_PATH', defaultValue, localEnvironment);
     }
@@ -85,11 +94,11 @@ class GlobalConfig {
      * Environment variable: EPI_PATH 
      * 
      * @public
-     * @param {object} localEnvironment     The local overrides, if not already specified or different from the constructor
+     * @param {DotenvParseOutput} localEnvironment     The local overrides, if not already specified or different from the constructor
      * @param {string} defaultValue         The default value if not set - by default '../Foundation'
      * @returns {string}
      */
-    getEpiPath(localEnvironment = {}, defaultValue = '../Foundation')
+    public getEpiPath(localEnvironment: DotenvParseOutput = {}, defaultValue: string = '../Foundation'): string
     {
         return this.getEnvVariable('EPI_PATH', defaultValue, localEnvironment);
     }
@@ -101,41 +110,46 @@ class GlobalConfig {
      * Environment variable: WEB_PATH 
      * 
      * @public
-     * @param {object} localEnvironment     The local overrides, if not already specified or different from the constructor
+     * @param {DotenvParseOutput} localEnvironment     The local overrides, if not already specified or different from the constructor
      * @param {string} defaultValue         The default value if not set - by default '/'
      * @returns {string}
      */
-    getWebPath(localEnvironment = {}, defaultValue = '/')
+    public getWebPath(localEnvironment: DotenvParseOutput = {}, defaultValue: string = '/'): string
     {
         return this.getEnvVariable('WEB_PATH', defaultValue, localEnvironment);
     }
 
-    getLibPath(localEnvironment = {}, defaultValue = 'lib')
+    public getPublicUrl(localEnvironment: DotenvParseOutput = {}, defaultValue: string = ''): string
+    {
+        return this.getEnvVariable('PUBLIC_URL', defaultValue, localEnvironment) || this.getEpiserverURL();
+    }
+
+    public getLibPath(localEnvironment: DotenvParseOutput = {}, defaultValue = 'lib')
     {
         return this.getEnvVariable('LIB_PATH', defaultValue, localEnvironment);
     }
 
-    getSourcePath(localEnvironment = {}, defaultValue = 'src')
+    public getSourcePath(localEnvironment: DotenvParseOutput = {}, defaultValue = 'src')
     {
         return this.getEnvVariable('SRC_PATH', defaultValue, localEnvironment);
     }
 
-    getExpressPath(localEnvironment = {}, defaultValue = 'express')
+    public getExpressPath(localEnvironment: DotenvParseOutput = {}, defaultValue = 'express')
     {
         return this.getEnvVariable('EXPRESS_PATH', defaultValue, localEnvironment);
     }
 
-    getEpiserverFormsDir(localEnvironment = {}, defaultValue = 'Scripts/EPiServer.ContentApi.Forms')
+    public getEpiserverFormsDir(localEnvironment: DotenvParseOutput = {}, defaultValue = 'Scripts/EPiServer.ContentApi.Forms')
     {
         return this.getEnvVariable('EPI_FORMS_PATH', defaultValue, localEnvironment)
     }
 
-    getNodeEnv(localEnvironment = {}, defaultValue = 'development')
+    public getNodeEnv(localEnvironment: DotenvParseOutput = {}, defaultValue = 'development')
     {
         return this.getEnvVariable("NODE_ENV", defaultValue, localEnvironment);
     }
 
-    isEpiserverFormsEnabled(localEnvironment = {}, defaultValue = 'false') {
+    public isEpiserverFormsEnabled(localEnvironment: DotenvParseOutput = {}, defaultValue = 'false') {
         return this.getEnvVariable('EPI_FORMS_INCLUDE', defaultValue, localEnvironment).toLowerCase() == 'true';
     }
 
@@ -145,11 +159,11 @@ class GlobalConfig {
      * this URL could be different from the URL where the application runs.
      * 
      * @public
-     * @param {object} localEnvironment Additional environment overrides to those provided in the constructor
+     * @param {DotenvParseOutput} localEnvironment Additional environment overrides to those provided in the constructor
      * @param {string} defaultValue     The default value if none set by the environment
      * @returns {string}
      */
-    getEpiserverURL(localEnvironment = {}, defaultValue = '/') {
+    public getEpiserverURL(localEnvironment: DotenvParseOutput = {}, defaultValue: string = '/'): string {
         let base_url = this.getEnvVariable('EPI_URL', defaultValue, localEnvironment);
         if (base_url.substr(-1) !== '/') {
             base_url = base_url + '/';
@@ -161,16 +175,16 @@ class GlobalConfig {
      * Generate the resolve configuration for Webpack
      * 
      * @public
-     * @param   {object}    envOverrides    The Environment overrides through the Webpack CLI
+     * @param   {DotenvParseOutput}    envOverrides    The Environment overrides through the Webpack CLI
      * @returns {object}    The Resolve configuration for Webpack
      */
-    getResolveConfig(envOverrides = undefined) {
+    public getResolveConfig(envOverrides?: DotenvParseOutput): object {
 
         const tsConfigFile = path.resolve(this._rootDir, this.getEnvVariable('TS_CONFIG_FILE', 'tsconfig.json', envOverrides));
-        const alias = {};
+        const alias : ResolveAliasConfig = {};
         if (fs.existsSync(tsConfigFile)) {
             console.log('Building resolve configuration from TypeScript config file: ', tsConfigFile);
-            const tsConfig = JSON.parse(fs.readFileSync(tsConfigFile));
+            const tsConfig = JSON.parse(fs.readFileSync(tsConfigFile).toString());
             var paths = (tsConfig.compilerOptions || {}).paths || {};
             var baseUrl = (tsConfig.compilerOptions || {}).baseUrl || '';
             for (var prefix in paths) {
@@ -184,7 +198,7 @@ class GlobalConfig {
             alias["app.express"] = path.resolve(this._rootDir, this.getExpressPath(envOverrides));
         }
 
-        const resolveConfig = {
+        const resolveConfig : ResolveConfig = {
             alias: alias,
             extensions: ['.js', '.jsx', '.json', '.tsx', '.ts']
         };
@@ -201,10 +215,10 @@ class GlobalConfig {
      * Create a list of NodeJS variables that will be replaced by their value
      * during the build process. This "fixates" the value in run-time. 
      * 
-     * @param {object} envOverrides A list of overrides for the environment variables
+     * @param {DotenvParseOutput} envOverrides A list of overrides for the environment variables
      * @returns {object} The configuration for the Webpack Define Plugin
      */
-    getDefineConfig(envOverrides = {})
+    public getDefineConfig(envOverrides: DotenvParseOutput = {}): object
     {
         return {
             'process.env.NODE_ENV': JSON.stringify(this.getNodeEnv(envOverrides)),
@@ -218,15 +232,16 @@ class GlobalConfig {
      * 
      * @public
      * @param {string} key              The name of the environment variable
-     * @param {string} defaultValue     The default value
-     * @param {object} overrides        Overrides for the environment
-     * @returns {string}                The value of the environment variable, or the defaultValue if it evaluates to false
+     * @param {T} defaultValue     The default value
+     * @param {DotenvParseOutput} overrides        Overrides for the environment
+     * @returns {string|T}                The value of the environment variable, or the defaultValue if it evaluates to false
      */
-    getEnvVariable(key, defaultValue = null, overrides = undefined) {
-        
-        let env = overrides ? Object.assign({}, this._myEnv, overrides) : this._myEnv;
-        return env[key] || defaultValue
+    public getEnvVariable<T>(key: string, defaultValue: T, overrides?: DotenvParseOutput): string | T
+    {    
+        const env = overrides ? Object.assign({}, this._myEnv, overrides) : this._myEnv;
+        const val = env[key];
+        return val || defaultValue
     } 
 }
 
-module.exports = GlobalConfig;
+export default GlobalConfig;

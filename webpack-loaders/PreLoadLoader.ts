@@ -1,9 +1,10 @@
-const loaderUtils = require('loader-utils');
-const validateOptions = require('schema-utils');
-const glob = require('glob');
-const path = require('path');
+import loaderUtils, { OptionObject, Readonly as ReadonlyOptions } from 'loader-utils';
+import { validate as validateOptions }  from 'schema-utils';
+import glob from 'glob';
+import path from 'path';
+import { Schema } from 'schema-utils/declarations/validate';
 
-const schema = {
+const schema : Schema = {
     type: 'object',
     properties: {
         pattern: {
@@ -15,6 +16,11 @@ const schema = {
     }
 };
 
+type PreLoadConfig = OptionObject & {
+    pattern: string,
+    extension: string
+}
+
 /**
  * Find and replace the @PreLoad annotation within a
  * TypeScript file to automatically create a pre-load
@@ -23,20 +29,21 @@ const schema = {
  * @param   {string}    source  The source prepared by Webpack
  * @returns {string}    The source with the injected preloading code
  */
-module.exports = function (source) {
-    const options = loaderUtils.getOptions(this);
-    validateOptions(schema, options, 'PreLoad loader');
+export const PreLoadLoader = (source : string) : string => {
+    const loaderContext : any = this;
+    const options : ReadonlyOptions<PreLoadConfig> = loaderUtils.getOptions(loaderContext) as ReadonlyOptions<PreLoadConfig>;
+    validateOptions(schema, options, { name: 'PreLoad loader' });
     var test = /\@PreLoad\("(.*)"\,"(.*)"\,"(.*)"\)/;
     var matches = source.match(test);
     if (matches) {
-        console.log("Found @PreLoad annotation in: "+this.resourcePath)
+        console.log("Found @PreLoad annotation in: " + loaderContext?.resourcePath)
 
         //Context
         const toReplace = matches[0];
         const component_path = matches[1];
         const variable = matches[2];
         const component_prefix = matches[3];
-        const component_dir = path.resolve(this.context, component_path);
+        const component_dir = path.resolve(loaderContext.context, component_path);
         const files = glob.sync(component_dir + "/" + options.pattern);
 
         //Debug
@@ -45,10 +52,8 @@ module.exports = function (source) {
         console.log("  - Component prefix: "+component_prefix);
 
         //Start building script
-        /** @type {string[]} */
-        const script = [];
-        /** @type {string[]} */
-        const script_end = [];
+        const script : string[] = [];
+        const script_end : string[] = [];
         if (!variable.includes('.')) { // Declare the global variable if there's no scope provided
             console.log("  - Injecting TypeScript variable declaration");
             script.push("declare var " + variable + ": any;");
@@ -56,7 +61,7 @@ module.exports = function (source) {
         script.push("try { "+variable+" = "+variable+" || {}; } catch (e) { "+variable+" = {}; }\n");
 
         //Handle components
-        files.forEach((function (file) {
+        files.forEach((function (file: string) {
             // 1. Get the name of the module from the file
             const module_name = path.basename(file, options.extension);
             // 2. Get the path of the module, relative to the starting point (making sure we use a forward slash as delimiter)
@@ -83,3 +88,4 @@ module.exports = function (source) {
 
     return source;
 }
+export default PreLoadLoader;

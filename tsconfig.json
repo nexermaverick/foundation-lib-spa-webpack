@@ -1,0 +1,19 @@
+{
+  "files": ["index.ts","bin/epi-auth.ts"],
+  "compilerOptions": {
+    "target": "ES5",
+    "jsx": "react",
+    "module": "CommonJS",
+    "declaration": true,
+    "noImplicitAny": true,
+    "outDir": "./cjs",
+    "strict": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "lib": ["ES5"],
+    "removeComments": false,
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules", "tests", "cjs"],
+  "include": ["bin"]
+}

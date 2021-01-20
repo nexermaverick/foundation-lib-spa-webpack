@@ -1,10 +1,11 @@
-const loaderUtils = require('loader-utils');
-const validateOptions = require('schema-utils');
+import loaderUtils from 'loader-utils';
+import { validate as validateOptions } from 'schema-utils';
+import { Schema } from 'schema-utils/declarations/validate';
 
 /**
  * Webpack Empty loader configuration definition
  */
-const schema = {
+const schema : Schema = {
     type: 'object',
     properties: {
     }
@@ -17,11 +18,11 @@ const schema = {
  * @param   {string}  source    The source of the resource that must be loaded
  * @returns {string}            An empty string
  */
-module.exports = (source) => {
+export const EmptyLoader = (source: string) : string => {
     const options = loaderUtils.getOptions(this);
     if (options) {
-        validateOptions(schema, options, 'Empty loader');
+        validateOptions(schema, options, { name: 'Empty loader'});
     }
-
     return '';
 }
+export default EmptyLoader;
