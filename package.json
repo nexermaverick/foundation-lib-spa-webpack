@@ -12,29 +12,28 @@
     },
     "main": "./cjs/index.js",
     "scripts": {
-        "compile": "npx tsc --build tsconfig.json"
+        "build": "npx tsc --build --project tsconfig.json",
+        "watch": "npx tsc --watch --project tsconfig.json"
     },
     "bin": {
-      "epi-auth": "cjs/bin/epi-auth.js",
-      "epi-login": "cjs/bin/epi-auth.js"
+        "epi-auth": "cjs/bin/epi-auth.js",
+        "epi-login": "cjs/bin/epi-auth.js"
     },
     "devDependencies": {
         "@episerver/spa-core": "git+https://github.com/episerver/foundation-lib-spa-core.git#Develop",
+        "@reduxjs/toolkit": "^1.5.0",
         "@types/form-data": "^2.5.0",
         "@types/glob": "^7.1.3",
         "@types/loader-utils": "^2.0.1",
         "@types/node": "^14.14.21",
+        "axios": "^0.21.1",
         "dotenv": "^8.2.0",
+        "dotenv-expand": "^5.1.0",
         "esm": "^3.2.25",
+        "eventemitter3": "^4.0.7",
         "form-data": "^3.0.0",
         "glob": "^7.1.4",
         "loader-utils": "^2.0.0",
-        "schema-utils": "^3.0.0",
-        "typescript": "^4.1.3",
-        "webpack": "^5.15.0",
-        "@reduxjs/toolkit": "^1.5.0",
-        "axios": "^0.21.1",
-        "eventemitter3": "^4.0.7",
         "lodash": "^4.17.20",
         "react": "^17.0.1",
         "react-dom": "^17.0.1",
@@ -42,11 +41,15 @@
         "react-redux": "^7.2.2",
         "react-router": "^5.2.0",
         "react-router-dom": "^5.2.0",
-        "uuid": "^8.3.2"
+        "schema-utils": "^3.0.0",
+        "typescript": "^4.1.3",
+        "uuid": "^8.3.2",
+        "webpack": "^5.15.0"
     },
     "peerDependencies": {
         "@episerver/spa-core": "^0.1.0",
         "dotenv": "^8.2.0",
+        "dotenv-expand": "^5.1.0",
         "esm": "^3.2.25",
         "glob": "^7.1.4",
         "loader-utils": "^2.0.0",

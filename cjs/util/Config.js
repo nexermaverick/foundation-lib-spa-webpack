@@ -7,6 +7,7 @@ exports.GlobalConfig = void 0;
 var path_1 = __importDefault(require("path"));
 var fs_1 = __importDefault(require("fs"));
 var dotenv_1 = __importDefault(require("dotenv"));
+var dotenv_expand_1 = __importDefault(require("dotenv-expand"));
 /**
  * Episerver SPA Configuration helper, to easily create Webpack config files,
  * which are using a .env file to store environment specific configuration
@@ -35,11 +36,29 @@ var GlobalConfig = /** @class */ (function () {
          * @var DotenvParseOutput
          */
         this._myEnv = {};
-        this._rootDir = rootDir;
+        this._rootDir = rootDir || process.cwd();
         this._localOverrides = localOverrides;
-        dotenv_1.default.config({ path: path_1.default.join(this._rootDir, '.env') });
+        // Apply .env files and afterwards expand them
+        this.getEnvFiles()
+            .map(function (dotEnvFile) { return dotenv_1.default.config({ path: dotEnvFile, debug: process.env.NODE_ENV === 'development' }); })
+            .forEach(function (x) { return dotenv_expand_1.default(x); });
+        // Create local env
         Object.assign(this._myEnv, process.env, this._localOverrides);
     }
+    /**
+     * Get the list of .env files that will be processed by the configuration
+     */
+    GlobalConfig.prototype.getEnvFiles = function () {
+        var _this = this;
+        var files = [".env", ".env.local"];
+        if (process.env.NODE_ENV) {
+            files.push(".env." + process.env.NODE_ENV + ".local");
+        }
+        return files
+            .map(function (x) { return path_1.default.join(_this._rootDir, x); })
+            .filter(function (x) { return fs_1.default.existsSync(x) && fs_1.default.statSync(x).isFile(); })
+            .reverse();
+    };
     /**
     * Retrieve the path were the code for the Episerver SPA Server Side
     * Rendering can be found, relative to the current path

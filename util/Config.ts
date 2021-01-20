@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import dotenv, { DotenvParseOutput } from 'dotenv';
+import dotEnvExpand from 'dotenv-expand';
 
 type ResolveAliasConfig = {
     [ alias: string ] : string
@@ -48,10 +49,31 @@ export class GlobalConfig {
      * @param {DotenvParseOutput} localOverrides The environment variables set by the Webpack CLI
      */
     public constructor(rootDir: string, localOverrides: DotenvParseOutput = {}) {
-        this._rootDir = rootDir;
+        this._rootDir = rootDir || process.cwd();
         this._localOverrides = localOverrides;
-        dotenv.config({path: path.join(this._rootDir, '.env')});
+
+        // Apply .env files and afterwards expand them
+        this.getEnvFiles()
+            .map(dotEnvFile => dotenv.config({ path: dotEnvFile, debug: process.env.NODE_ENV === 'development' }))
+            .forEach(x => dotEnvExpand(x));
+
+        // Create local env
         Object.assign(this._myEnv, process.env, this._localOverrides);
+    }
+
+    /**
+     * Get the list of .env files that will be processed by the configuration
+     */
+    public getEnvFiles() : string[]
+    {
+        let files : string[] = [".env", ".env.local"];
+        if (process.env.NODE_ENV) {
+            files.push(`.env.${ process.env.NODE_ENV }.local`);
+        }
+        return files
+                    .map(x => path.join(this._rootDir, x))
+                    .filter(x => fs.existsSync(x) && fs.statSync(x).isFile())
+                    .reverse();
     }
 
      /**

@@ -44,12 +44,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var readline_1 = __importDefault(require("readline"));
 var crypto_1 = __importDefault(require("crypto"));
 var url_1 = require("url");
-// Import NPM Distrubuted 3rd party libraries
-var dotenv_1 = __importDefault(require("dotenv"));
-// Import episerver libraries, as ESNext modules
+// Import episerver libraries through ESM, as they are delivered as ESNext modules
 var esm = require('esm')(module, {});
 var epi = esm('@episerver/spa-core');
 // Import local classes
+var Config_1 = __importDefault(require("../util/Config"));
 var ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
 var EpiAuthCli = /** @class */ (function () {
     /**
@@ -167,9 +166,9 @@ var EpiAuthCli = /** @class */ (function () {
     return EpiAuthCli;
 }());
 // Query env for settings
-dotenv_1.default.config();
+var config = new Config_1.default(process.cwd());
 var argv_url = process.argv.slice(2, 3)[0];
-var env_url = process.env.EPI_URL;
+var env_url = config.getEpiserverURL();
 var epi_url = argv_url || env_url;
 // Validate that whe have the required setup
 if (!epi_url) {

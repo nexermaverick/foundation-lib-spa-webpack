@@ -34,6 +34,10 @@ export declare class GlobalConfig {
      */
     constructor(rootDir: string, localOverrides?: DotenvParseOutput);
     /**
+     * Get the list of .env files that will be processed by the configuration
+     */
+    getEnvFiles(): string[];
+    /**
     * Retrieve the path were the code for the Episerver SPA Server Side
     * Rendering can be found, relative to the current path
     *

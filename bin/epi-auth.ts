@@ -5,14 +5,12 @@ import readline from 'readline';
 import crypto from 'crypto';
 import { URL } from 'url';
 
-// Import NPM Distrubuted 3rd party libraries
-import dotenv from 'dotenv';
-
-// Import episerver libraries, as ESNext modules
+// Import episerver libraries through ESM, as they are delivered as ESNext modules
 const esm = require('esm')(module, {});
 const epi = esm('@episerver/spa-core');
 
 // Import local classes
+import GlobalConfig from '../util/Config';
 import ClientAuthStorage from '../ContentDelivery/ClientAuthStorage';
 
 class EpiAuthCli {
@@ -124,9 +122,9 @@ class EpiAuthCli {
 }
 
 // Query env for settings
-dotenv.config();
+const config : GlobalConfig = new GlobalConfig(process.cwd());
 const argv_url = process.argv.slice(2,3)[0];
-const env_url = process.env.EPI_URL;
+const env_url = config.getEpiserverURL();
 const epi_url = argv_url || env_url;
 
 // Validate that whe have the required setup

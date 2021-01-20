@@ -15,5 +15,4 @@
     "skipLibCheck": true
   },
   "exclude": ["node_modules", "tests", "cjs"],
-  "include": ["bin"]
 }
