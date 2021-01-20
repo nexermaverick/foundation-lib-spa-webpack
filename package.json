@@ -12,8 +12,7 @@
     },
     "main": "./cjs/index.js",
     "scripts": {
-        "compile": "npx tsc --build tsconfig.json",
-        "prepack": "npx tsc --build tsconfig.json"
+        "compile": "npx tsc --build tsconfig.json"
     },
     "bin": {
       "epi-auth": "cjs/bin/epi-auth.js",
