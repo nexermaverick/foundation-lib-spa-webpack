@@ -39,6 +39,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 // Import native Node.JS libraries
 var readline_1 = __importDefault(require("readline"));
@@ -72,16 +73,23 @@ var EpiAuthCli = /** @class */ (function () {
                 this.output.write(stringToWrite);
         };
         // Configure AUTH Api
-        var u = new url_1.URL(config.BaseURL);
-        var cd_api = new epi.ContentDelivery.API_V2({
-            BaseURL: config.BaseURL,
-            Debug: false,
-            EnableExtensions: true
-        });
-        var hash = crypto_1.default.createHash('sha256');
-        hash.update(u.hostname);
-        var cd_auth_storage = new ClientAuthStorage_1.default(hash.digest('hex'));
-        this._auth = new epi.ContentDelivery.DefaultAuthService(cd_api, cd_auth_storage);
+        try {
+            var u = new url_1.URL(config.BaseURL);
+            var cd_api = new epi.ContentDelivery.API_V2({
+                BaseURL: config.BaseURL,
+                Debug: false,
+                EnableExtensions: true
+            });
+            var hash = crypto_1.default.createHash('sha256');
+            hash.update(u.hostname);
+            var cd_auth_storage = new ClientAuthStorage_1.default(hash.digest('hex'));
+            this._auth = new epi.ContentDelivery.DefaultAuthService(cd_api, cd_auth_storage);
+        }
+        catch (e) {
+            this._rli.write("\n\n\u001B[31mInvalid Episerver URL provided: " + config.BaseURL + "\u001B[0m\n\n");
+            this._rli.close();
+            process.exit(1);
+        }
     }
     EpiAuthCli.prototype.start = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -90,10 +98,9 @@ var EpiAuthCli = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this._auth.isAuthenticated().catch(function (e) {
-                            _this._rli.write('ERROR!');
+                            _this._rli.write("\n\n\u001B[31mError while validating authentication status: " + e.message + "\u001B[0m\n\n");
                             _this._rli.close();
-                            console.log();
-                            process.exit(100);
+                            process.exit(1);
                         })];
                     case 1:
                         auth = _a.sent();
@@ -138,9 +145,14 @@ var EpiAuthCli = /** @class */ (function () {
     EpiAuthCli.prototype.doLogin = function (user, pass) {
         var _this = this;
         this._rli.write("\n\nAttempting to login\u001B[36m " + user + "\u001B[0m, using provided password:");
-        this._auth.login(user, pass).catch(function () { return false; }).then(function (success) {
-            _this._rli.write(success ? '\x1b[32m success\x1b[0m\n\n' : '\x1b[31m failed\x1b[0m\n\n');
+        this._auth.login(user, pass).catch(function (e) {
+            _this._rli.write("\u001B[31m\n\n !!! Login failed: " + e.message + " !!!\u001B[0m\n\n");
             _this._rli.close();
+            process.exit(1);
+        }).then(function (success) {
+            _this._rli.write(' ' + (success ? '\x1b[32msuccess\x1b[0m' : '\x1b[31minvalid credentials or locked account\x1b[0m') + '\n\n.');
+            _this._rli.close();
+            process.exit(success ? 0 : 1);
         });
     };
     /**
@@ -165,15 +177,39 @@ var EpiAuthCli = /** @class */ (function () {
     };
     return EpiAuthCli;
 }());
+var yargs_1 = __importDefault(require("yargs"));
+var EpiEnvOptions_1 = __importDefault(require("../util/EpiEnvOptions"));
+// Read the Command Line arguments
+var epiEnvChoices = [EpiEnvOptions_1.default.Development, EpiEnvOptions_1.default.Integration, EpiEnvOptions_1.default.Preproduction, EpiEnvOptions_1.default.Production];
+var defaultEnv = epiEnvChoices.indexOf(process.env.NODE_ENV || "", 0) >= 0 ? process.env.NODE_ENV || "" : 'development';
+var args = yargs_1.default(process.argv.slice(2))
+    .alias('e', ['environment', 'env'])
+    .describe('e', 'The environment to run the authentication for (when using .env files)')
+    .choices('e', ["development", "integration", "preproduction", "production"])
+    .default('e', defaultEnv)
+    .coerce('e', function (value) { return EpiEnvOptions_1.default.Parse(value); })
+    .alias('d', ['domain'])
+    .describe('d', 'The domain to authenticate against, overrides the value from .env files')
+    .coerce('d', function (value) { if (!value)
+    return undefined; try {
+    return new url_1.URL(value);
+}
+catch (e) {
+    throw new Error("The value \"" + value + "\" is not a valid URL");
+} })
+    .string('d')
+    .alias('i', ['insecure', 'no-cert'])
+    .describe('i', 'Remove all security implied by SSL/TLS by disabling certificate checking in Node.JS - only use when there\'s no alternative.')
+    .boolean('i')
+    .help("help")
+    .argv;
 // Query env for settings
-var config = new Config_1.default(process.cwd());
-var argv_url = process.argv.slice(2, 3)[0];
-var env_url = config.getEpiserverURL();
-var epi_url = argv_url || env_url;
-// Validate that whe have the required setup
-if (!epi_url) {
-    console.log('\x1b[31m\nUnable to determine the Episerver instance, provide the URL either as first\nargument or through the EPI_URL environment variable. If you have a .env file,\nyou can also put it in there.\n\x1b[0m');
-    process.exit();
+var config = new Config_1.default(process.cwd(), {}, args.environment);
+var epi_url = ((_a = args.domain) === null || _a === void 0 ? void 0 : _a.href) || config.getEpiserverURL();
+// Disable SSL/TLS security if configured to do so
+if (args.insecure === true) {
+    console.warn('\x1b[31mDisabled certificate checking, this breaks identity verification of the server!\x1b[0m');
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 }
 // Run the actual script
 var auth = new EpiAuthCli({

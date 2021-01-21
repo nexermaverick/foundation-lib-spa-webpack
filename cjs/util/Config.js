@@ -8,6 +8,7 @@ var path_1 = __importDefault(require("path"));
 var fs_1 = __importDefault(require("fs"));
 var dotenv_1 = __importDefault(require("dotenv"));
 var dotenv_expand_1 = __importDefault(require("dotenv-expand"));
+var EpiEnvOptions_1 = __importDefault(require("./EpiEnvOptions"));
 /**
  * Episerver SPA Configuration helper, to easily create Webpack config files,
  * which are using a .env file to store environment specific configuration
@@ -20,40 +21,30 @@ var GlobalConfig = /** @class */ (function () {
      * @param {string} rootDir The root path of the application
      * @param {DotenvParseOutput} localOverrides The environment variables set by the Webpack CLI
      */
-    function GlobalConfig(rootDir, localOverrides) {
+    function GlobalConfig(rootDir, localOverrides, envName) {
         if (localOverrides === void 0) { localOverrides = {}; }
-        /**
-         * Local overrides for the environment
-         *
-         * @private
-         * @var object
-         */
-        this._localOverrides = {};
-        /**
-         * Local copy of the environment
-         *
-         * @private
-         * @var DotenvParseOutput
-         */
-        this._myEnv = {};
         this._rootDir = rootDir || process.cwd();
         this._localOverrides = localOverrides;
+        this._envName = EpiEnvOptions_1.default.Parse(envName || process.env.NODE_ENV || '') || 'development';
         // Apply .env files and afterwards expand them
         this.getEnvFiles()
-            .map(function (dotEnvFile) { return dotenv_1.default.config({ path: dotEnvFile, debug: process.env.NODE_ENV === 'development' }); })
+            .map(function (dotEnvFile) { return dotenv_1.default.config({ path: dotEnvFile }); })
             .forEach(function (x) { return dotenv_expand_1.default(x); });
         // Create local env
+        this._myEnv = {};
         Object.assign(this._myEnv, process.env, this._localOverrides);
+        // Update NODE_ENV if not set
+        if (!this._myEnv['NODE_ENV']) {
+            process.env.NODE_ENV = this._envName == EpiEnvOptions_1.default.Development ? 'development' : 'production';
+            this._myEnv['NODE_ENV'] = this._envName == EpiEnvOptions_1.default.Development ? 'development' : 'production';
+        }
     }
     /**
      * Get the list of .env files that will be processed by the configuration
      */
     GlobalConfig.prototype.getEnvFiles = function () {
         var _this = this;
-        var files = [".env", ".env.local"];
-        if (process.env.NODE_ENV) {
-            files.push(".env." + process.env.NODE_ENV + ".local");
-        }
+        var files = [".env", ".env.local", ".env." + this._envName + ".local"];
         return files
             .map(function (x) { return path_1.default.join(_this._rootDir, x); })
             .filter(function (x) { return fs_1.default.existsSync(x) && fs_1.default.statSync(x).isFile(); })
@@ -153,6 +144,9 @@ var GlobalConfig = /** @class */ (function () {
         if (localEnvironment === void 0) { localEnvironment = {}; }
         if (defaultValue === void 0) { defaultValue = 'development'; }
         return this.getEnvVariable("NODE_ENV", defaultValue, localEnvironment);
+    };
+    GlobalConfig.prototype.getEpiEnvironment = function () {
+        return this._envName;
     };
     GlobalConfig.prototype.isEpiserverFormsEnabled = function (localEnvironment, defaultValue) {
         if (localEnvironment === void 0) { localEnvironment = {}; }

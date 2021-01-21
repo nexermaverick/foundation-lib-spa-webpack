@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import dotenv, { DotenvParseOutput } from 'dotenv';
 import dotEnvExpand from 'dotenv-expand';
+import EpiEnvOptions, { EpiEnvOption } from './EpiEnvOptions';
 
 type ResolveAliasConfig = {
     [ alias: string ] : string
@@ -32,7 +33,7 @@ export class GlobalConfig {
      * @private
      * @var object
      */
-    private _localOverrides : DotenvParseOutput = {};
+    private _localOverrides : DotenvParseOutput;
 
     /**
      * Local copy of the environment
@@ -40,7 +41,9 @@ export class GlobalConfig {
      * @private
      * @var DotenvParseOutput
      */
-    private _myEnv : DotenvParseOutput = {};
+    private _myEnv : DotenvParseOutput;
+
+    private _envName : EpiEnvOption;
 
     /**
      * Create a new configuration helper for the current context
@@ -48,17 +51,25 @@ export class GlobalConfig {
      * @param {string} rootDir The root path of the application
      * @param {DotenvParseOutput} localOverrides The environment variables set by the Webpack CLI
      */
-    public constructor(rootDir: string, localOverrides: DotenvParseOutput = {}) {
+    public constructor(rootDir: string, localOverrides: DotenvParseOutput = {}, envName?: EpiEnvOption) {
         this._rootDir = rootDir || process.cwd();
         this._localOverrides = localOverrides;
+        this._envName = EpiEnvOptions.Parse(envName || process.env.NODE_ENV || '') || 'development';
 
         // Apply .env files and afterwards expand them
         this.getEnvFiles()
-            .map(dotEnvFile => dotenv.config({ path: dotEnvFile, debug: process.env.NODE_ENV === 'development' }))
+            .map(dotEnvFile => dotenv.config({ path: dotEnvFile }))
             .forEach(x => dotEnvExpand(x));
 
         // Create local env
+        this._myEnv = {};
         Object.assign(this._myEnv, process.env, this._localOverrides);
+
+        // Update NODE_ENV if not set
+        if (!this._myEnv['NODE_ENV']) {
+            process.env.NODE_ENV = this._envName == EpiEnvOptions.Development ? 'development' : 'production';
+            this._myEnv['NODE_ENV'] = this._envName == EpiEnvOptions.Development ? 'development' : 'production';
+        }
     }
 
     /**
@@ -66,10 +77,7 @@ export class GlobalConfig {
      */
     public getEnvFiles() : string[]
     {
-        let files : string[] = [".env", ".env.local"];
-        if (process.env.NODE_ENV) {
-            files.push(`.env.${ process.env.NODE_ENV }.local`);
-        }
+        let files : string[] = [".env", ".env.local", `.env.${ this._envName }.local`];
         return files
                     .map(x => path.join(this._rootDir, x))
                     .filter(x => fs.existsSync(x) && fs.statSync(x).isFile())
@@ -169,6 +177,11 @@ export class GlobalConfig {
     public getNodeEnv(localEnvironment: DotenvParseOutput = {}, defaultValue = 'development')
     {
         return this.getEnvVariable("NODE_ENV", defaultValue, localEnvironment);
+    }
+
+    public getEpiEnvironment()
+    {
+        return this._envName;
     }
 
     public isEpiserverFormsEnabled(localEnvironment: DotenvParseOutput = {}, defaultValue = 'false') {

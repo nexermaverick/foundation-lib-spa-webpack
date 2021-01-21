@@ -1,4 +1,5 @@
 import { DotenvParseOutput } from 'dotenv';
+import { EpiEnvOption } from './EpiEnvOptions';
 /**
  * Episerver SPA Configuration helper, to easily create Webpack config files,
  * which are using a .env file to store environment specific configuration
@@ -26,13 +27,14 @@ export declare class GlobalConfig {
      * @var DotenvParseOutput
      */
     private _myEnv;
+    private _envName;
     /**
      * Create a new configuration helper for the current context
      *
      * @param {string} rootDir The root path of the application
      * @param {DotenvParseOutput} localOverrides The environment variables set by the Webpack CLI
      */
-    constructor(rootDir: string, localOverrides?: DotenvParseOutput);
+    constructor(rootDir: string, localOverrides?: DotenvParseOutput, envName?: EpiEnvOption);
     /**
      * Get the list of .env files that will be processed by the configuration
      */
@@ -92,6 +94,7 @@ export declare class GlobalConfig {
     getExpressPath(localEnvironment?: DotenvParseOutput, defaultValue?: string): string;
     getEpiserverFormsDir(localEnvironment?: DotenvParseOutput, defaultValue?: string): string;
     getNodeEnv(localEnvironment?: DotenvParseOutput, defaultValue?: string): string;
+    getEpiEnvironment(): EpiEnvOption;
     isEpiserverFormsEnabled(localEnvironment?: DotenvParseOutput, defaultValue?: string): boolean;
     /**
      * Retrieve the URL at which Episerver is running, always ending with a
