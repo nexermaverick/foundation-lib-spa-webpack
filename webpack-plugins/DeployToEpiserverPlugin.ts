@@ -5,6 +5,8 @@ import crypto from 'crypto';
 import { ContentDelivery } from '@episerver/spa-core';
 import ClientAuthStorage from '../ContentDelivery/ClientAuthStorage';
 import { Plugin, Compiler } from 'webpack/index';
+import { AxiosRequestConfig } from 'axios';
+import { URL } from 'url';
 
 const PLUGIN_NAME = 'DeployToEpiserverPlugin';
 
@@ -56,7 +58,7 @@ export class DeployToEpiserverPlugin extends Plugin {
                 logger.status(`Building request data for ${ filepath }`);
                 const formData = new FormData();
                 formData.append(that.options.filename, fs.createReadStream(filepath));
-                const requestConfig = {
+                const requestConfig : Partial<AxiosRequestConfig> = {
                     method: 'POST',
                     data: formData,
                     headers: formData.getHeaders()
