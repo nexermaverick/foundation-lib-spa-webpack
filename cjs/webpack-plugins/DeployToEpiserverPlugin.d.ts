@@ -1,5 +1,4 @@
-/// <reference types="webpack" />
-import { Plugin, Compiler } from 'webpack/index';
+import { DelegatedPlugin as Plugin, Compiler } from 'webpack';
 export declare type DeployToEpiserverPluginOptions = {
     base: string;
     filepath: string;
@@ -10,7 +9,7 @@ export declare class DeployToEpiserverPlugin extends Plugin {
     private _auth;
     private _api;
     private _isAuthorized;
-    private options;
+    options: Readonly<DeployToEpiserverPluginOptions>;
     constructor(options: DeployToEpiserverPluginOptions);
     apply(compiler: Compiler): void;
 }

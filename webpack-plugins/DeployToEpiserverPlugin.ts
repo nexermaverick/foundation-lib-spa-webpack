@@ -5,7 +5,7 @@ import crypto from 'crypto';
 const esm = require('esm')(module, {});
 const epi = esm('@episerver/spa-core');
 import ClientAuthStorage from '../ContentDelivery/ClientAuthStorage';
-import { Plugin, Compiler } from 'webpack/index';
+import { DelegatedPlugin as Plugin, Compiler } from 'webpack';
 import { AxiosRequestConfig } from 'axios';
 import { URL } from 'url';
 
@@ -22,7 +22,7 @@ export class DeployToEpiserverPlugin extends Plugin {
     private _auth: any; //ContentDelivery.IAuthService;
     private _api : any; //ContentDelivery.IContentDeliveryAPI_V2;
     private _isAuthorized : boolean = false;
-    private options: DeployToEpiserverPluginOptions;
+    public options: Readonly<DeployToEpiserverPluginOptions>;
 
     constructor(options : DeployToEpiserverPluginOptions){
         super();

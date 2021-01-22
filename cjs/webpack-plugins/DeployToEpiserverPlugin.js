@@ -60,7 +60,7 @@ var crypto_1 = __importDefault(require("crypto"));
 var esm = require('esm')(module, {});
 var epi = esm('@episerver/spa-core');
 var ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
-var index_1 = require("webpack/index");
+var webpack_1 = require("webpack");
 var url_1 = require("url");
 var PLUGIN_NAME = 'DeployToEpiserverPlugin';
 var DeployToEpiserverPlugin = /** @class */ (function (_super) {
@@ -129,6 +129,6 @@ var DeployToEpiserverPlugin = /** @class */ (function (_super) {
         }); });
     };
     return DeployToEpiserverPlugin;
-}(index_1.Plugin));
+}(webpack_1.DelegatedPlugin));
 exports.DeployToEpiserverPlugin = DeployToEpiserverPlugin;
 exports.default = DeployToEpiserverPlugin;
