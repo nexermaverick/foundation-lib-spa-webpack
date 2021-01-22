@@ -1,17 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EpiEnvOptions = void 0;
-var EpiEnvOptions = /** @class */ (function () {
-    function EpiEnvOptions() {
-    }
+class EpiEnvOptions {
     /**
      * Convert a string to one of the constants of this class.
      *
      * @param   { string }  strValue
      * @returns { EpiEnvOptions | undefined }
      */
-    EpiEnvOptions.Parse = function (strValue) {
-        var output;
+    static Parse(strValue) {
+        let output;
         switch (strValue.toLowerCase()) {
             case 'development':
             case 'dev':
@@ -31,12 +29,11 @@ var EpiEnvOptions = /** @class */ (function () {
                 break;
         }
         return output;
-    };
-    EpiEnvOptions.Development = "development";
-    EpiEnvOptions.Integration = "integration";
-    EpiEnvOptions.Preproduction = "preproduction";
-    EpiEnvOptions.Production = "production";
-    return EpiEnvOptions;
-}());
+    }
+}
 exports.EpiEnvOptions = EpiEnvOptions;
+EpiEnvOptions.Development = "development";
+EpiEnvOptions.Integration = "integration";
+EpiEnvOptions.Preproduction = "preproduction";
+EpiEnvOptions.Production = "production";
 exports.default = EpiEnvOptions;

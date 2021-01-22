@@ -18,11 +18,11 @@ const schema : Schema = {
  * @param   {string}  source    The source of the resource that must be loaded
  * @returns {string}            An empty string
  */
-export const EmptyLoader = (source: string) : string => {
+const EmptyLoader = (source: string) : string => {
     const options = loaderUtils.getOptions(this);
     if (options) {
         validateOptions(schema, options, { name: 'Empty loader'});
     }
     return '';
 }
-export default EmptyLoader;
+module.exports = EmptyLoader;

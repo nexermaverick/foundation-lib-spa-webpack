@@ -1,8 +1,7 @@
 {
   /*"files": ["index.ts","bin/epi-auth.ts"],*/
   "compilerOptions": {
-    "target": "ES5",
-    "jsx": "react",
+    "target": "ES2015",
     "module": "CommonJS",
     "declaration": true,
     "noImplicitAny": true,
@@ -10,7 +9,7 @@
     "strict": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "lib": ["ES5"],
+    "lib": ["ES2015"],
     "removeComments": false,
     "skipLibCheck": true
   },

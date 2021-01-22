@@ -4,6 +4,7 @@ export declare type DeployToEpiserverPluginOptions = {
     filepath: string;
     filename: string;
     path: string;
+    insecure?: boolean;
 };
 export declare class DeployToEpiserverPlugin extends Plugin {
     private _auth;

@@ -29,7 +29,8 @@ type PreLoadConfig = OptionObject & {
  * @param   {string}    source  The source prepared by Webpack
  * @returns {string}    The source with the injected preloading code
  */
-export const PreLoadLoader = (source : string) : string => {
+function PreLoadLoader (source : string) : string {
+    // @ts-ignore: This is controlled by Webpack so allowing usage here
     const loaderContext : any = this;
     const options : ReadonlyOptions<PreLoadConfig> = loaderUtils.getOptions(loaderContext) as ReadonlyOptions<PreLoadConfig>;
     validateOptions(schema, options, { name: 'PreLoad loader' });
@@ -73,7 +74,7 @@ export const PreLoadLoader = (source : string) : string => {
             // 5. Push the needed lines of code
             script.push("import " + module_varname + " from '" + module_import +"';");
             script_end.push(variable + "[\"" + module_import + "\"] = " + module_varname +";");
-        }).bind(this));
+        }).bind(loaderContext));
 
         const inject = [
             "// Start: Injected PreLoad script",
@@ -88,4 +89,5 @@ export const PreLoadLoader = (source : string) : string => {
 
     return source;
 }
-export default PreLoadLoader;
+
+module.exports = PreLoadLoader;

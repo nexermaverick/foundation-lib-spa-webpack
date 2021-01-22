@@ -15,7 +15,8 @@ export type DeployToEpiserverPluginOptions = {
     base: string,
     filepath: string,
     filename: string,
-    path: string
+    path: string,
+    insecure?: boolean
 }
 
 export class DeployToEpiserverPlugin extends Plugin {
@@ -50,6 +51,12 @@ export class DeployToEpiserverPlugin extends Plugin {
         const that = this;
         const logger = compiler.getInfrastructureLogger(PLUGIN_NAME);
         compiler.hooks.afterEmit.tapAsync('DeployToEpiserverPlugin', async (compilation, callback) => {
+
+            if (that.options.insecure) {
+                logger.warn('\x1b[31mDisabled certificate checking, this breaks identity verification of the server!\x1b[0m')
+                process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+            }
+
             if (!that._isAuthorized) {
                 logger.error('Not authenticated, ensure you\'ve authenticated yourself prior to deploying to Episerver.');
             } else {
