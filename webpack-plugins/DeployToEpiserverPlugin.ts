@@ -2,7 +2,8 @@ import path from 'path';
 import FormData from 'form-data';
 import fs from 'fs';
 import crypto from 'crypto';
-import { ContentDelivery } from '@episerver/spa-core';
+const esm = require('esm')(module, {});
+const epi = esm('@episerver/spa-core');
 import ClientAuthStorage from '../ContentDelivery/ClientAuthStorage';
 import { Plugin, Compiler } from 'webpack/index';
 import { AxiosRequestConfig } from 'axios';
@@ -18,8 +19,8 @@ export type DeployToEpiserverPluginOptions = {
 }
 
 export class DeployToEpiserverPlugin extends Plugin {
-    private _auth: ContentDelivery.IAuthService;
-    private _api : ContentDelivery.IContentDeliveryAPI_V2;
+    private _auth: any; //ContentDelivery.IAuthService;
+    private _api : any; //ContentDelivery.IContentDeliveryAPI_V2;
     private _isAuthorized : boolean = false;
     private options: DeployToEpiserverPluginOptions;
 
@@ -28,7 +29,7 @@ export class DeployToEpiserverPlugin extends Plugin {
 
         // Configure AUTH Api
         const u = new URL(options.base);
-        this._api = new ContentDelivery.API_V2({
+        this._api = new epi.ContentDelivery.API_V2({
             BaseURL: u.href,
             Debug: false,
             EnableExtensions: true
@@ -36,10 +37,10 @@ export class DeployToEpiserverPlugin extends Plugin {
         const hash = crypto.createHash('sha256');
         hash.update(u.hostname);
         const cd_auth_storage = new ClientAuthStorage(hash.digest('hex'));
-        this._auth = new ContentDelivery.DefaultAuthService(this._api, cd_auth_storage);
+        this._auth = new epi.ContentDelivery.DefaultAuthService(this._api, cd_auth_storage);
 
         // Check status
-        this._auth.isAuthenticated().catch(() => false).then(authorized => this._isAuthorized = authorized);
+        this._auth.isAuthenticated().catch(() => false).then((authorized : boolean) => this._isAuthorized = authorized);
 
         // Set options
         this.options = options;

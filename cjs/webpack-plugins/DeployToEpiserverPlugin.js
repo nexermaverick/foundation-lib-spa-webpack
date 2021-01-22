@@ -57,7 +57,8 @@ var path_1 = __importDefault(require("path"));
 var form_data_1 = __importDefault(require("form-data"));
 var fs_1 = __importDefault(require("fs"));
 var crypto_1 = __importDefault(require("crypto"));
-var spa_core_1 = require("@episerver/spa-core");
+var esm = require('esm')(module, {});
+var epi = esm('@episerver/spa-core');
 var ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
 var index_1 = require("webpack/index");
 var url_1 = require("url");
@@ -69,7 +70,7 @@ var DeployToEpiserverPlugin = /** @class */ (function (_super) {
         _this._isAuthorized = false;
         // Configure AUTH Api
         var u = new url_1.URL(options.base);
-        _this._api = new spa_core_1.ContentDelivery.API_V2({
+        _this._api = new epi.ContentDelivery.API_V2({
             BaseURL: u.href,
             Debug: false,
             EnableExtensions: true
@@ -77,7 +78,7 @@ var DeployToEpiserverPlugin = /** @class */ (function (_super) {
         var hash = crypto_1.default.createHash('sha256');
         hash.update(u.hostname);
         var cd_auth_storage = new ClientAuthStorage_1.default(hash.digest('hex'));
-        _this._auth = new spa_core_1.ContentDelivery.DefaultAuthService(_this._api, cd_auth_storage);
+        _this._auth = new epi.ContentDelivery.DefaultAuthService(_this._api, cd_auth_storage);
         // Check status
         _this._auth.isAuthenticated().catch(function () { return false; }).then(function (authorized) { return _this._isAuthorized = authorized; });
         // Set options
