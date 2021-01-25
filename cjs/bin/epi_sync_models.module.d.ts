@@ -1,11 +1,13 @@
 import { ContentDelivery } from '@episerver/spa-core';
 import GlobalConfig from '../util/Config';
-export declare type TypeOverviewResponse = TypeDefinitionData[];
-export declare type TypeDefinitionData = {
+export declare type TypeOverviewResponse = TypeDefinition[];
+export declare type TypeDefinition = {
     Name: string;
     DisplayName: string;
     Description: string;
     GUID: string;
+};
+export declare type TypeDefinitionData = TypeDefinition & {
     Properties: {
         Name: string;
         DisplayName: string;
@@ -51,7 +53,7 @@ export declare class EpiModelSync {
      * @param {string[]}    allItemNames
      * @param {void}
      */
-    protected createModelFile(typeName: string, allItemNames: string[]): void;
+    protected createModelFile(typeName: TypeDefinition, allItemNames: string[]): void;
     /**
      * Convert the reported model type to a TypeScript type
      *

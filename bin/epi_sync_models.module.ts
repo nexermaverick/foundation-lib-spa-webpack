@@ -11,12 +11,14 @@ import GlobalConfig from '../util/Config';
 import ClientAuthStorage from '../ContentDelivery/ClientAuthStorage';
 
 // Definitions
-export type TypeOverviewResponse = TypeDefinitionData[];
-export type TypeDefinitionData = {
+export type TypeOverviewResponse = TypeDefinition[];
+export type TypeDefinition = {
     Name: string,
     DisplayName: string,
     Description: string,
     GUID: string
+}
+export type TypeDefinitionData = TypeDefinition & {
     Properties: { 
         Name: string,
         DisplayName: string,
@@ -78,7 +80,7 @@ export class EpiModelSync {
             const modelNames = r.map(x => x.Name);
             me.clearModels(modelNames.map(x => me.getModelInterfaceName(x)));
             console.log(' - Start creating/updating model definitions');
-            modelNames.forEach(model => me.createModelFile(model, modelNames));
+            r.forEach(model => me.createModelFile(model, modelNames));
             me.createAsyncTypeMapper(modelNames);
         }).catch(reason => console.log(reason));
     }
@@ -132,10 +134,10 @@ export class EpiModelSync {
      * @param {string[]}    allItemNames
      * @param {void}
      */
-    protected createModelFile(typeName: string, allItemNames: string[]) : void {
+    protected createModelFile(typeName: TypeDefinition, allItemNames: string[]) : void {
         // console.log('   - Fetching model definition for '+typeName);
         const me = this;
-        this._doRequest<TypeDefinitionData>(this.getServiceUrl(typeName)).then(info => {
+        this._doRequest<TypeDefinitionData>(this.getServiceUrl(typeName.GUID)).then(info => {
             if (!info) return;
             const interfaceName = me.getModelInterfaceName(info.Name);
             const propsInterfaceName = me.getComponentPropertiesInterfaceName(info.Name);

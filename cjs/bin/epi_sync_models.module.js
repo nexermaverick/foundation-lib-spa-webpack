@@ -58,7 +58,7 @@ class EpiModelSync {
             const modelNames = r.map(x => x.Name);
             me.clearModels(modelNames.map(x => me.getModelInterfaceName(x)));
             console.log(' - Start creating/updating model definitions');
-            modelNames.forEach(model => me.createModelFile(model, modelNames));
+            r.forEach(model => me.createModelFile(model, modelNames));
             me.createAsyncTypeMapper(modelNames);
         }).catch(reason => console.log(reason));
     }
@@ -110,7 +110,7 @@ class EpiModelSync {
     createModelFile(typeName, allItemNames) {
         // console.log('   - Fetching model definition for '+typeName);
         const me = this;
-        this._doRequest(this.getServiceUrl(typeName)).then(info => {
+        this._doRequest(this.getServiceUrl(typeName.GUID)).then(info => {
             if (!info)
                 return;
             const interfaceName = me.getModelInterfaceName(info.Name);
