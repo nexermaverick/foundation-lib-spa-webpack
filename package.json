@@ -12,12 +12,13 @@
     },
     "main": "./cjs/index.js",
     "scripts": {
-        "build": "npx tsc --build tsconfig.json",
-        "watch": "npx tsc --watch tsconfig.json"
+        "build": "npx tsc --pretty --project tsconfig.json",
+        "watch": "npx tsc --watch --pretty --project tsconfig.json"
     },
     "bin": {
         "epi-auth": "cjs/bin/epi-auth.js",
-        "epi-login": "cjs/bin/epi-auth.js"
+        "epi-login": "cjs/bin/epi-auth.js",
+        "epi-sync-models": "cjs/bin/epi_sync_models.js"
     },
     "devDependencies": {
         "@episerver/spa-core": "git+https://github.com/episerver/foundation-lib-spa-core.git#Develop",

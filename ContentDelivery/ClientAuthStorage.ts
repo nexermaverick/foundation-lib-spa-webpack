@@ -2,6 +2,8 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import * as epi from '@episerver/spa-core';
+import { URL } from 'url';
+import crypto from 'crypto';
 
 /**
  * Implementation of a basic file storage for the authentication data 
@@ -29,6 +31,13 @@ export class ClientAuthStorage {
     private _homeDir: string = '';
 
     private _filePostFix = '';
+
+    public static CreateFromUrl(u : URL) : ClientAuthStorage
+    {
+        const hash = crypto.createHash('sha256');
+        hash.update(u.host);
+        return new ClientAuthStorage(hash.digest('hex'));
+    }
 
     /**
      * 

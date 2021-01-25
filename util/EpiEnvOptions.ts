@@ -10,9 +10,9 @@ export class EpiEnvOptions {
      * @param   { string }  strValue 
      * @returns { EpiEnvOptions | undefined }
      */
-    public static Parse (strValue: string) : Readonly<EpiEnvOption | undefined>
+    public static Parse<T extends EpiEnvOption | undefined> (strValue: string, defaultValue: T) : Readonly<EpiEnvOption | T>
     {
-        let output : EpiEnvOption | undefined;
+        let output : EpiEnvOption | T = defaultValue;
         switch(strValue.toLowerCase())
         {
             case 'development':

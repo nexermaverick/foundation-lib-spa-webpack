@@ -23,8 +23,11 @@ class GlobalConfig {
      */
     constructor(rootDir, localOverrides = {}, envName) {
         this._rootDir = rootDir || process.cwd();
+        if (!fs_1.default.existsSync(this._rootDir)) {
+            throw new Error('Invalid application root directory');
+        }
         this._localOverrides = localOverrides;
-        this._envName = EpiEnvOptions_1.default.Parse(envName || process.env.NODE_ENV || '') || 'development';
+        this._envName = EpiEnvOptions_1.default.Parse(envName || process.env.NODE_ENV || '', 'development');
         // Apply .env files and afterwards expand them
         this.getEnvFiles()
             .map(dotEnvFile => dotenv_1.default.config({ path: dotEnvFile }))
@@ -34,9 +37,29 @@ class GlobalConfig {
         Object.assign(this._myEnv, process.env, this._localOverrides);
         // Update NODE_ENV if not set
         if (!this._myEnv['NODE_ENV']) {
-            process.env.NODE_ENV = this._envName == EpiEnvOptions_1.default.Development ? 'development' : 'production';
-            this._myEnv['NODE_ENV'] = this._envName == EpiEnvOptions_1.default.Development ? 'development' : 'production';
+            this.override('NODE_ENV', this._envName == EpiEnvOptions_1.default.Development ? 'development' : 'production');
         }
+    }
+    getRootDir() {
+        return this._rootDir;
+    }
+    getSourceDir() {
+        return path_1.default.join(this.getRootDir(), this.getSourcePath());
+    }
+    getServerDir() {
+        return path_1.default.join(this.getRootDir(), this.getServerPath());
+    }
+    /**
+     * Override a specific environment variable within this configuration context.
+     *
+     * @param   {string}    key The environment key to override
+     * @param   {string}    value The new value of the environment key
+     * @returns {this}      The current configuration for command chaining
+     */
+    override(key, value) {
+        this._myEnv[key] = value;
+        process.env[key] = '0';
+        return this;
     }
     /**
      * Get the list of .env files that will be processed by the configuration

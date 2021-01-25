@@ -53,8 +53,11 @@ export class GlobalConfig {
      */
     public constructor(rootDir: string, localOverrides: DotenvParseOutput = {}, envName?: EpiEnvOption) {
         this._rootDir = rootDir || process.cwd();
+        if (!fs.existsSync(this._rootDir)) {
+            throw new Error('Invalid application root directory');
+        }
         this._localOverrides = localOverrides;
-        this._envName = EpiEnvOptions.Parse(envName || process.env.NODE_ENV || '') || 'development';
+        this._envName = EpiEnvOptions.Parse(envName || process.env.NODE_ENV || '', 'development');
 
         // Apply .env files and afterwards expand them
         this.getEnvFiles()
@@ -67,9 +70,37 @@ export class GlobalConfig {
 
         // Update NODE_ENV if not set
         if (!this._myEnv['NODE_ENV']) {
-            process.env.NODE_ENV = this._envName == EpiEnvOptions.Development ? 'development' : 'production';
-            this._myEnv['NODE_ENV'] = this._envName == EpiEnvOptions.Development ? 'development' : 'production';
+            this.override('NODE_ENV', this._envName == EpiEnvOptions.Development ? 'development' : 'production');
         }
+    }
+
+    public getRootDir() : string
+    {
+        return this._rootDir;
+    }
+
+    public getSourceDir() : string
+    {
+        return path.join(this.getRootDir(), this.getSourcePath());
+    }
+
+    public getServerDir() : string
+    {
+        return path.join(this.getRootDir(), this.getServerPath());
+    }
+
+    /**
+     * Override a specific environment variable within this configuration context.
+     * 
+     * @param   {string}    key The environment key to override
+     * @param   {string}    value The new value of the environment key
+     * @returns {this}      The current configuration for command chaining
+     */
+    public override(key: string, value: string) : this
+    {
+        this._myEnv[key] = value;
+        process.env[key] = '0';
+        return this;
     }
 
     /**

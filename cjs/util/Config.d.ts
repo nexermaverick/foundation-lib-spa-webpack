@@ -35,6 +35,17 @@ export declare class GlobalConfig {
      * @param {DotenvParseOutput} localOverrides The environment variables set by the Webpack CLI
      */
     constructor(rootDir: string, localOverrides?: DotenvParseOutput, envName?: EpiEnvOption);
+    getRootDir(): string;
+    getSourceDir(): string;
+    getServerDir(): string;
+    /**
+     * Override a specific environment variable within this configuration context.
+     *
+     * @param   {string}    key The environment key to override
+     * @param   {string}    value The new value of the environment key
+     * @returns {this}      The current configuration for command chaining
+     */
+    override(key: string, value: string): this;
     /**
      * Get the list of .env files that will be processed by the configuration
      */

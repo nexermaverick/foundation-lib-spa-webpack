@@ -8,8 +8,8 @@ class EpiEnvOptions {
      * @param   { string }  strValue
      * @returns { EpiEnvOptions | undefined }
      */
-    static Parse(strValue) {
-        let output;
+    static Parse(strValue, defaultValue) {
+        let output = defaultValue;
         switch (strValue.toLowerCase()) {
             case 'development':
             case 'dev':

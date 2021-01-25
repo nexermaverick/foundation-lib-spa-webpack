@@ -9,7 +9,7 @@ export declare class EpiEnvOptions {
      * @param   { string }  strValue
      * @returns { EpiEnvOptions | undefined }
      */
-    static Parse(strValue: string): Readonly<EpiEnvOption | undefined>;
+    static Parse<T extends EpiEnvOption | undefined>(strValue: string, defaultValue: T): Readonly<EpiEnvOption | T>;
 }
 export declare type EpiEnvOption = "development" | "integration" | "preproduction" | "production";
 export default EpiEnvOptions;

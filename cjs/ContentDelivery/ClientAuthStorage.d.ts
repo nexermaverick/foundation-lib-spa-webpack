@@ -1,4 +1,6 @@
+/// <reference types="node" />
 import * as epi from '@episerver/spa-core';
+import { URL } from 'url';
 /**
  * Implementation of a basic file storage for the authentication data
  * for interacting with Episerver
@@ -23,6 +25,7 @@ export declare class ClientAuthStorage {
      */
     private _homeDir;
     private _filePostFix;
+    static CreateFromUrl(u: URL): ClientAuthStorage;
     /**
      *
      * @param {string} [scope] The scope for the file name

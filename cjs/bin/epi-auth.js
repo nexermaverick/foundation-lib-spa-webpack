@@ -1,5 +1,24 @@
 #!/usr/bin/env node
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12,17 +31,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 // Import native Node.JS libraries
 const readline_1 = __importDefault(require("readline"));
-const crypto_1 = __importDefault(require("crypto"));
 const url_1 = require("url");
 // Import episerver libraries through ESM, as they are delivered as ESNext modules
 const esm = require('esm')(module, {});
 const epi = esm('@episerver/spa-core');
-// Import local classes
-const Config_1 = __importDefault(require("../util/Config"));
 const ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
 class EpiAuthCli {
     /**
@@ -53,10 +68,7 @@ class EpiAuthCli {
                 Debug: false,
                 EnableExtensions: true
             });
-            const hash = crypto_1.default.createHash('sha256');
-            hash.update(u.hostname);
-            const cd_auth_storage = new ClientAuthStorage_1.default(hash.digest('hex'));
-            this._auth = new epi.ContentDelivery.DefaultAuthService(cd_api, cd_auth_storage);
+            this._auth = new epi.ContentDelivery.DefaultAuthService(cd_api, ClientAuthStorage_1.default.CreateFromUrl(u));
         }
         catch (e) {
             this._rli.write(`\n\n\x1b[31mInvalid Episerver URL provided: ${config.BaseURL}\x1b[0m\n\n`);
@@ -126,41 +138,18 @@ class EpiAuthCli {
 }
 const yargs_1 = __importDefault(require("yargs"));
 const EpiEnvOptions_1 = __importDefault(require("../util/EpiEnvOptions"));
+const CliApplication = __importStar(require("../util/CliArguments"));
 // Read the Command Line arguments
-const epiEnvChoices = [EpiEnvOptions_1.default.Development, EpiEnvOptions_1.default.Integration, EpiEnvOptions_1.default.Preproduction, EpiEnvOptions_1.default.Production];
-const defaultEnv = epiEnvChoices.indexOf(process.env.NODE_ENV || "", 0) >= 0 ? process.env.NODE_ENV || "" : 'development';
-const args = yargs_1.default(process.argv.slice(2))
-    .alias('e', ['environment', 'env'])
-    .describe('e', 'The environment to run the authentication for (when using .env files)')
-    .choices('e', ["development", "integration", "preproduction", "production"])
-    .default('e', defaultEnv)
-    .coerce('e', value => EpiEnvOptions_1.default.Parse(value))
-    .alias('d', ['domain'])
-    .describe('d', 'The domain to authenticate against, overrides the value from .env files')
-    .coerce('d', (value) => { if (!value)
-    return undefined; try {
-    return new url_1.URL(value);
-}
-catch (e) {
-    throw new Error(`The value "${value}" is not a valid URL`);
-} })
-    .string('d')
-    .alias('i', ['insecure', 'no-cert'])
-    .describe('i', 'Remove all security implied by SSL/TLS by disabling certificate checking in Node.JS - only use when there\'s no alternative.')
-    .boolean('i')
+const defaultEnv = EpiEnvOptions_1.default.Parse(process.env.NODE_ENV || '', EpiEnvOptions_1.default.Development);
+const args = CliApplication
+    .Setup(yargs_1.default(process.argv.slice(2)), defaultEnv)
     .help("help")
     .argv;
 // Query env for settings
-const config = new Config_1.default(process.cwd(), {}, args.environment);
-const epi_url = ((_a = args.domain) === null || _a === void 0 ? void 0 : _a.href) || config.getEpiserverURL();
-// Disable SSL/TLS security if configured to do so
-if (args.insecure === true) {
-    console.warn('\x1b[31mDisabled certificate checking, this breaks identity verification of the server!\x1b[0m');
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-}
+const config = CliApplication.CreateConfig(args);
 // Run the actual script
 var auth = new EpiAuthCli({
-    BaseURL: epi_url,
+    BaseURL: config.getEpiserverURL(),
     input: process.stdin,
     output: process.stdout
 });
