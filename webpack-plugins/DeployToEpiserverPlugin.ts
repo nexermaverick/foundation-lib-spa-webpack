@@ -1,7 +1,6 @@
 import path from 'path';
 import FormData from 'form-data';
 import fs from 'fs';
-import crypto from 'crypto';
 const esm = require('esm')(module, {});
 const epi = esm('@episerver/spa-core');
 import ClientAuthStorage from '../ContentDelivery/ClientAuthStorage';
@@ -35,10 +34,7 @@ export class DeployToEpiserverPlugin extends Plugin {
             Debug: false,
             EnableExtensions: true
         });
-        const hash = crypto.createHash('sha256');
-        hash.update(u.hostname);
-        const cd_auth_storage = new ClientAuthStorage(hash.digest('hex'));
-        this._auth = new epi.ContentDelivery.DefaultAuthService(this._api, cd_auth_storage);
+        this._auth = new epi.ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage.CreateFromUrl(u));
 
         // Check status
         this._auth.isAuthenticated().catch(() => false).then((authorized : boolean) => this._isAuthorized = authorized);

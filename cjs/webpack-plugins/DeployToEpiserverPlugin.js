@@ -16,7 +16,6 @@ exports.DeployToEpiserverPlugin = void 0;
 const path_1 = __importDefault(require("path"));
 const form_data_1 = __importDefault(require("form-data"));
 const fs_1 = __importDefault(require("fs"));
-const crypto_1 = __importDefault(require("crypto"));
 const esm = require('esm')(module, {});
 const epi = esm('@episerver/spa-core');
 const ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
@@ -34,10 +33,7 @@ class DeployToEpiserverPlugin extends webpack_1.DelegatedPlugin {
             Debug: false,
             EnableExtensions: true
         });
-        const hash = crypto_1.default.createHash('sha256');
-        hash.update(u.hostname);
-        const cd_auth_storage = new ClientAuthStorage_1.default(hash.digest('hex'));
-        this._auth = new epi.ContentDelivery.DefaultAuthService(this._api, cd_auth_storage);
+        this._auth = new epi.ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage_1.default.CreateFromUrl(u));
         // Check status
         this._auth.isAuthenticated().catch(() => false).then((authorized) => this._isAuthorized = authorized);
         // Set options
