@@ -43,6 +43,12 @@ export class GlobalConfig {
      */
     private _myEnv : DotenvParseOutput;
 
+    /**
+     * The name of the current environment to read the configuration for.
+     * 
+     * @private
+     * @var EpiEnvOption
+     */
     private _envName : EpiEnvOption;
 
     /**
@@ -57,7 +63,7 @@ export class GlobalConfig {
             throw new Error('Invalid application root directory');
         }
         this._localOverrides = localOverrides;
-        this._envName = EpiEnvOptions.Parse(envName || process.env.NODE_ENV || '', 'development');
+        this._envName = EpiEnvOptions.Parse(envName || localOverrides.EPI_ENV || process.env.EPI_ENV || process.env.NODE_ENV || '', 'development');
 
         // Apply .env files and afterwards expand them
         this.getEnvFiles()
@@ -74,11 +80,23 @@ export class GlobalConfig {
         }
     }
 
+    /**
+     * Retrieve the main application folder, as understood by this configuration
+     * helper.
+     * 
+     * @returns { string }
+     */
     public getRootDir() : string
     {
         return this._rootDir;
     }
 
+    /**
+     * Retrieve the absolute path to the folder containing the main application 
+     * sources
+     * 
+     * @returns { string }
+     */
     public getSourceDir() : string
     {
         return path.join(this.getRootDir(), this.getSourcePath());
@@ -195,11 +213,6 @@ export class GlobalConfig {
         return this.getEnvVariable('SRC_PATH', defaultValue, localEnvironment);
     }
 
-    public getExpressPath(localEnvironment: DotenvParseOutput = {}, defaultValue = 'express')
-    {
-        return this.getEnvVariable('EXPRESS_PATH', defaultValue, localEnvironment);
-    }
-
     public getEpiserverFormsDir(localEnvironment: DotenvParseOutput = {}, defaultValue = 'Scripts/EPiServer.ContentApi.Forms')
     {
         return this.getEnvVariable('EPI_FORMS_PATH', defaultValue, localEnvironment)
@@ -261,7 +274,6 @@ export class GlobalConfig {
         } else {
             alias["app"] = path.resolve(this._rootDir, this.getSourcePath(envOverrides));
             alias["app.server"] = path.resolve(this._rootDir, this.getServerPath(envOverrides));
-            alias["app.express"] = path.resolve(this._rootDir, this.getExpressPath(envOverrides));
         }
 
         const resolveConfig : ResolveConfig = {
