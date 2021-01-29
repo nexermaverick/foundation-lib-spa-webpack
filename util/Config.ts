@@ -97,14 +97,24 @@ export class GlobalConfig {
      * 
      * @returns { string }
      */
-    public getSourceDir() : string
+    public getSourceDir(localEnvironment: DotenvParseOutput = {}) : string
     {
-        return path.join(this.getRootDir(), this.getSourcePath());
+        return path.resolve(this.getRootDir(), this.getSourcePath(localEnvironment)).replace(/\\/g, "/");
     }
 
-    public getServerDir() : string
+    public getServerDir(localEnvironment: DotenvParseOutput = {}) : string
     {
-        return path.join(this.getRootDir(), this.getServerPath());
+        return path.resolve(this.getRootDir(), this.getServerPath(localEnvironment)).replace(/\\/g, "/");
+    }
+
+    public getAssetDir(localEnvironment: DotenvParseOutput = {}) : string
+    {
+        return path.resolve(this.getRootDir(), this.getAssetPath(localEnvironment)).replace(/\\/g, "/");
+    }
+
+    public getDistDir(localEnvironment: DotenvParseOutput = {}) : string
+    {
+        return path.resolve(this.getRootDir(), this.getDistPath(localEnvironment)).replace(/\\/g, "/");
     }
 
     /**
@@ -203,14 +213,19 @@ export class GlobalConfig {
         return this.getEnvVariable('PUBLIC_URL', defaultValue, localEnvironment) || this.getEpiserverURL();
     }
 
-    public getLibPath(localEnvironment: DotenvParseOutput = {}, defaultValue = 'lib')
-    {
-        return this.getEnvVariable('LIB_PATH', defaultValue, localEnvironment);
-    }
-
     public getSourcePath(localEnvironment: DotenvParseOutput = {}, defaultValue = 'src')
     {
         return this.getEnvVariable('SRC_PATH', defaultValue, localEnvironment);
+    }
+
+    public getAssetPath(localEnvironment: DotenvParseOutput = {}, defaultValue = 'public')
+    {
+        return this.getEnvVariable('ASSET_PATH', defaultValue, localEnvironment);
+    }
+
+    public getDistPath(localEnvironment: DotenvParseOutput = {}, defaultValue = 'dist')
+    {
+        return this.getEnvVariable('DIST_PATH', defaultValue, localEnvironment);
     }
 
     public getEpiserverFormsDir(localEnvironment: DotenvParseOutput = {}, defaultValue = 'Scripts/EPiServer.ContentApi.Forms')
@@ -300,8 +315,8 @@ export class GlobalConfig {
     {
         return {
             'process.env.NODE_ENV': JSON.stringify(this.getNodeEnv(envOverrides)),
-            'process.env.EPI_URL': JSON.stringify(this.getEnvVariable("EPI_URL","/",envOverrides)),
-            'process.env.WEB_PATH': JSON.stringify(this.getWebPath())
+            'process.env.EPI_URL': JSON.stringify(this.getEpiserverURL(envOverrides)),
+            'process.env.WEB_PATH': JSON.stringify(this.getWebPath(envOverrides))
         }
     }
 

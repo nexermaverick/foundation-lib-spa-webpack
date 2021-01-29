@@ -27,6 +27,12 @@ export declare class GlobalConfig {
      * @var DotenvParseOutput
      */
     private _myEnv;
+    /**
+     * The name of the current environment to read the configuration for.
+     *
+     * @private
+     * @var EpiEnvOption
+     */
     private _envName;
     /**
      * Create a new configuration helper for the current context
@@ -35,9 +41,23 @@ export declare class GlobalConfig {
      * @param {DotenvParseOutput} localOverrides The environment variables set by the Webpack CLI
      */
     constructor(rootDir: string, localOverrides?: DotenvParseOutput, envName?: EpiEnvOption);
+    /**
+     * Retrieve the main application folder, as understood by this configuration
+     * helper.
+     *
+     * @returns { string }
+     */
     getRootDir(): string;
-    getSourceDir(): string;
-    getServerDir(): string;
+    /**
+     * Retrieve the absolute path to the folder containing the main application
+     * sources
+     *
+     * @returns { string }
+     */
+    getSourceDir(localEnvironment?: DotenvParseOutput): string;
+    getServerDir(localEnvironment?: DotenvParseOutput): string;
+    getAssetDir(localEnvironment?: DotenvParseOutput): string;
+    getDistDir(localEnvironment?: DotenvParseOutput): string;
     /**
      * Override a specific environment variable within this configuration context.
      *
@@ -100,9 +120,9 @@ export declare class GlobalConfig {
      */
     getWebPath(localEnvironment?: DotenvParseOutput, defaultValue?: string): string;
     getPublicUrl(localEnvironment?: DotenvParseOutput, defaultValue?: string): string;
-    getLibPath(localEnvironment?: DotenvParseOutput, defaultValue?: string): string;
     getSourcePath(localEnvironment?: DotenvParseOutput, defaultValue?: string): string;
-    getExpressPath(localEnvironment?: DotenvParseOutput, defaultValue?: string): string;
+    getAssetPath(localEnvironment?: DotenvParseOutput, defaultValue?: string): string;
+    getDistPath(localEnvironment?: DotenvParseOutput, defaultValue?: string): string;
     getEpiserverFormsDir(localEnvironment?: DotenvParseOutput, defaultValue?: string): string;
     getNodeEnv(localEnvironment?: DotenvParseOutput, defaultValue?: string): string;
     getEpiEnvironment(): EpiEnvOption;

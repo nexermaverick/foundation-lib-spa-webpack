@@ -27,7 +27,7 @@ class GlobalConfig {
             throw new Error('Invalid application root directory');
         }
         this._localOverrides = localOverrides;
-        this._envName = EpiEnvOptions_1.default.Parse(envName || process.env.NODE_ENV || '', 'development');
+        this._envName = EpiEnvOptions_1.default.Parse(envName || localOverrides.EPI_ENV || process.env.EPI_ENV || process.env.NODE_ENV || '', 'development');
         // Apply .env files and afterwards expand them
         this.getEnvFiles()
             .map(dotEnvFile => dotenv_1.default.config({ path: dotEnvFile }))
@@ -40,14 +40,32 @@ class GlobalConfig {
             this.override('NODE_ENV', this._envName == EpiEnvOptions_1.default.Development ? 'development' : 'production');
         }
     }
+    /**
+     * Retrieve the main application folder, as understood by this configuration
+     * helper.
+     *
+     * @returns { string }
+     */
     getRootDir() {
         return this._rootDir;
     }
-    getSourceDir() {
-        return path_1.default.join(this.getRootDir(), this.getSourcePath());
+    /**
+     * Retrieve the absolute path to the folder containing the main application
+     * sources
+     *
+     * @returns { string }
+     */
+    getSourceDir(localEnvironment = {}) {
+        return path_1.default.resolve(this.getRootDir(), this.getSourcePath(localEnvironment)).replace(/\\/g, "/");
     }
-    getServerDir() {
-        return path_1.default.join(this.getRootDir(), this.getServerPath());
+    getServerDir(localEnvironment = {}) {
+        return path_1.default.resolve(this.getRootDir(), this.getServerPath(localEnvironment)).replace(/\\/g, "/");
+    }
+    getAssetDir(localEnvironment = {}) {
+        return path_1.default.resolve(this.getRootDir(), this.getAssetPath(localEnvironment)).replace(/\\/g, "/");
+    }
+    getDistDir(localEnvironment = {}) {
+        return path_1.default.resolve(this.getRootDir(), this.getDistPath(localEnvironment)).replace(/\\/g, "/");
     }
     /**
      * Override a specific environment variable within this configuration context.
@@ -131,14 +149,14 @@ class GlobalConfig {
     getPublicUrl(localEnvironment = {}, defaultValue = '') {
         return this.getEnvVariable('PUBLIC_URL', defaultValue, localEnvironment) || this.getEpiserverURL();
     }
-    getLibPath(localEnvironment = {}, defaultValue = 'lib') {
-        return this.getEnvVariable('LIB_PATH', defaultValue, localEnvironment);
-    }
     getSourcePath(localEnvironment = {}, defaultValue = 'src') {
         return this.getEnvVariable('SRC_PATH', defaultValue, localEnvironment);
     }
-    getExpressPath(localEnvironment = {}, defaultValue = 'express') {
-        return this.getEnvVariable('EXPRESS_PATH', defaultValue, localEnvironment);
+    getAssetPath(localEnvironment = {}, defaultValue = 'public') {
+        return this.getEnvVariable('ASSET_PATH', defaultValue, localEnvironment);
+    }
+    getDistPath(localEnvironment = {}, defaultValue = 'dist') {
+        return this.getEnvVariable('DIST_PATH', defaultValue, localEnvironment);
     }
     getEpiserverFormsDir(localEnvironment = {}, defaultValue = 'Scripts/EPiServer.ContentApi.Forms') {
         return this.getEnvVariable('EPI_FORMS_PATH', defaultValue, localEnvironment);
@@ -193,7 +211,6 @@ class GlobalConfig {
         else {
             alias["app"] = path_1.default.resolve(this._rootDir, this.getSourcePath(envOverrides));
             alias["app.server"] = path_1.default.resolve(this._rootDir, this.getServerPath(envOverrides));
-            alias["app.express"] = path_1.default.resolve(this._rootDir, this.getExpressPath(envOverrides));
         }
         const resolveConfig = {
             alias: alias,
@@ -215,8 +232,8 @@ class GlobalConfig {
     getDefineConfig(envOverrides = {}) {
         return {
             'process.env.NODE_ENV': JSON.stringify(this.getNodeEnv(envOverrides)),
-            'process.env.EPI_URL': JSON.stringify(this.getEnvVariable("EPI_URL", "/", envOverrides)),
-            'process.env.WEB_PATH': JSON.stringify(this.getWebPath())
+            'process.env.EPI_URL': JSON.stringify(this.getEpiserverURL(envOverrides)),
+            'process.env.WEB_PATH': JSON.stringify(this.getWebPath(envOverrides))
         };
     }
     /**
