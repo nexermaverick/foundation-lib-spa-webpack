@@ -42,12 +42,10 @@ const ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAu
 class EpiAuthCli {
     /**
      *
-     * @param { Object } config
-     * @param { string } config.BaseURL The Base URL where your episerver instance is running
-     * @param { NodeJS.ReadableStream } [config.input] The input stream to use to handle authentication
-     * @param { NodeJS.WritableStream } [config.output] The output stream to use to handle authentication
+     * @param { EpiAuthCliConfig } config
      */
     constructor(config) {
+        this.config = config;
         // Configure CLI Interface
         this._rli = readline_1.default.createInterface(config.input || process.stdin, config.output || process.stdout);
         this._rli.write(`\n == Episerver CLI Authentication tool (${config.BaseURL}) == \n\n`);
@@ -78,7 +76,9 @@ class EpiAuthCli {
     }
     start() {
         return __awaiter(this, void 0, void 0, function* () {
-            const auth = yield this._auth.isAuthenticated().catch((e) => {
+            const forceLogin = this.config.force || false;
+            //console.log(forceLogin);process.exit(0);
+            const auth = this.config.force ? false : yield this._auth.isAuthenticated().catch((e) => {
                 this._rli.write(`\n\n\x1b[31mError while validating authentication status: ${e.message}\x1b[0m\n\n`);
                 this._rli.close();
                 process.exit(1);
@@ -100,8 +100,8 @@ class EpiAuthCli {
     }
     askCredentials() {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield this.ask('Username: ');
-            const pass = yield this.ask('Password: ', true);
+            const user = this.config.username || (yield this.ask('Username: '));
+            const pass = this.config.password || (yield this.ask('Password: ', true));
             return this.doLogin(user, pass);
         });
     }
@@ -112,7 +112,7 @@ class EpiAuthCli {
             this._rli.close();
             process.exit(1);
         }).then((success) => {
-            this._rli.write(' ' + (success ? '\x1b[32msuccess\x1b[0m' : '\x1b[31minvalid credentials or locked account\x1b[0m') + '\n\n.');
+            this._rli.write(' ' + (success ? '\x1b[32msuccess\x1b[0m' : '\x1b[31minvalid credentials or locked account\x1b[0m') + '.\n\n');
             this._rli.close();
             process.exit(success ? 0 : 1);
         });
@@ -142,8 +142,18 @@ const CliApplication = __importStar(require("../util/CliArguments"));
 // Read the Command Line arguments
 const defaultEnv = EpiEnvOptions_1.default.Parse(process.env.NODE_ENV || '', EpiEnvOptions_1.default.Development);
 const args = CliApplication
-    .Setup(yargs_1.default(process.argv.slice(2)), defaultEnv)
-    .help("help")
+    .Setup(yargs_1.default(process.argv.slice(2)), defaultEnv, "Optimizely CMS Login Script", cfg => cfg
+    .alias('u', 'username')
+    .describe('u', 'Insecurely pass username, only use from scripts that don\'t append to shell history')
+    .string('u')
+    .alias('p', 'password')
+    .describe('p', 'Insecurely pass password, only use from scripts that don\'t append to shell history')
+    .string('p')
+    .alias('f', 'force')
+    .describe('f', 'Force reauthentication, even if authentication is present')
+    .boolean('f')
+    .default('f', false)
+    .group(['u', 'p', 'f'], 'Login parameters'))
     .argv;
 // Query env for settings
 const config = CliApplication.CreateConfig(args);
@@ -151,6 +161,9 @@ const config = CliApplication.CreateConfig(args);
 var auth = new EpiAuthCli({
     BaseURL: config.getEpiserverURL(),
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
+    username: args.username,
+    password: args.password,
+    force: args.force
 });
 auth.start();

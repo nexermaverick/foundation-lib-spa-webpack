@@ -14,11 +14,14 @@ export type CliArgs = {
     insecure : CliArgs['i']
 }
 
-export const Setup : <T extends object = {}>(yargs: yargs.Argv<T>, defaultEnv ?: EpiEnvOption) => yargs.Argv<T & CliArgs> = 
-<T extends object = {}>(yargs: yargs.Argv<T>, defaultEnv : EpiEnvOption = EpiEnvOptions.Development) : yargs.Argv<T & CliArgs> =>
+type ConfigureCallback<T extends object = {}> = (yargs : yargs.Argv<T>) => void;
+type SetupFunction = <T extends object = {}>(yargs: yargs.Argv<{}>, defaultEnv ?: EpiEnvOption, name ?: string, config?: ConfigureCallback<T & CliArgs> ) => yargs.Argv<T & CliArgs>
+
+export const Setup : SetupFunction = 
+<T extends object = {}>(yargs: yargs.Argv<{}>, defaultEnv : EpiEnvOption = EpiEnvOptions.Development, name ?: string, config?: ConfigureCallback<T & CliArgs>) : yargs.Argv<T & CliArgs> =>
 {
     const envChoices : EpiEnvOption[] = ['development','integration','preproduction','production']
-    const cfg = (yargs as yargs.Argv<T & CliArgs>)
+    const cfg = yargs
         .alias('e', ['env', 'environment'])
         .describe('e', 'The environment to run the authentication for (when using .env files)')
         .default('e', defaultEnv)
@@ -30,8 +33,13 @@ export const Setup : <T extends object = {}>(yargs: yargs.Argv<T>, defaultEnv ?:
         .string('d')
         .alias('i', 'insecure')
         .describe('i', 'Remove all security implied by SSL/TLS by disabling certificate checking in Node.JS - only use when there\'s no alternative.')
-        .boolean('i');
-    return cfg as yargs.Argv<T & CliArgs>;
+        .boolean('i')
+        .help('help')
+        .group(['d','i','e'], 'Optimizely DXP settings')
+        .epilogue(name || "") as yargs.Argv<T & CliArgs>
+
+    if (config) config(cfg);
+    return cfg;
 }
 
 export const CreateConfig : (cliArgs : yargs.Arguments<CliArgs>, overrides ?: DotenvParseOutput) => GlobalConfig = (args, overrides = {}) =>

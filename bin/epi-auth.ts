@@ -12,6 +12,15 @@ const epi = esm('@episerver/spa-core');
 import GlobalConfig from '../util/Config';
 import ClientAuthStorage from '../ContentDelivery/ClientAuthStorage';
 
+type EpiAuthCliConfig = {
+    BaseURL  :   string
+    input    ?:  NodeJS.ReadableStream
+    output   ?:  NodeJS.WritableStream
+    username ?:  string
+    password ?:  string
+    force    ?:  boolean
+}
+
 class EpiAuthCli {
     /**
      * @type { readline.Interface }
@@ -29,15 +38,16 @@ class EpiAuthCli {
      */
     private _auth : any;
 
+    private config : EpiAuthCliConfig;
+
     /**
      * 
-     * @param { Object } config
-     * @param { string } config.BaseURL The Base URL where your episerver instance is running
-     * @param { NodeJS.ReadableStream } [config.input] The input stream to use to handle authentication
-     * @param { NodeJS.WritableStream } [config.output] The output stream to use to handle authentication
+     * @param { EpiAuthCliConfig } config
      */
-    constructor(config : any) 
+    constructor(config : EpiAuthCliConfig) 
     {
+        this.config = config;
+
         // Configure CLI Interface
         this._rli = readline.createInterface(config.input || process.stdin, config.output || process.stdout);
         this._rli.write(`\n == Episerver CLI Authentication tool (${ config.BaseURL }) == \n\n`);
@@ -67,7 +77,9 @@ class EpiAuthCli {
     }
 
     async start() {
-        const auth = await this._auth.isAuthenticated().catch((e : Error) => {
+        const forceLogin : boolean = this.config.force || false;
+        //console.log(forceLogin);process.exit(0);
+        const auth = this.config.force ? false : await this._auth.isAuthenticated().catch((e : Error) => {
             this._rli.write(`\n\n\x1b[31mError while validating authentication status: ${ e.message }\x1b[0m\n\n`);
             this._rli.close();
             process.exit(1);
@@ -88,8 +100,8 @@ class EpiAuthCli {
 
     protected async askCredentials() : Promise<void>
     {
-        const user = await this.ask('Username: ');
-        const pass = await this.ask('Password: ', true);
+        const user = this.config.username || await this.ask('Username: ');
+        const pass = this.config.password || await this.ask('Password: ', true);
         return this.doLogin(user, pass);
     }
 
@@ -101,7 +113,7 @@ class EpiAuthCli {
             this._rli.close();
             process.exit(1);
         }).then((success : boolean) => {
-            this._rli.write(' ' + (success ? '\x1b[32msuccess\x1b[0m' : '\x1b[31minvalid credentials or locked account\x1b[0m') + '\n\n.');
+            this._rli.write(' ' + (success ? '\x1b[32msuccess\x1b[0m' : '\x1b[31minvalid credentials or locked account\x1b[0m') + '.\n\n');
             this._rli.close();
             process.exit(success ? 0 : 1);
         });
@@ -131,11 +143,31 @@ import yargs from 'yargs';
 import EpiEnvOptions, { EpiEnvOption } from '../util/EpiEnvOptions';
 import * as CliApplication from '../util/CliArguments';
 
+type LoginArgs = {
+    u?: string,
+    username?: string,
+    p?: string,
+    password?: string,
+    f?: boolean,
+    force?: boolean
+};
+
 // Read the Command Line arguments
 const defaultEnv : EpiEnvOption = EpiEnvOptions.Parse(process.env.NODE_ENV || '', EpiEnvOptions.Development);
-const args : yargs.Arguments<CliApplication.CliArgs> = CliApplication
-    .Setup(yargs(process.argv.slice(2)), defaultEnv)
-    .help("help")
+const args = CliApplication
+    .Setup<LoginArgs>(yargs(process.argv.slice(2)), defaultEnv, "Optimizely CMS Login Script", cfg => cfg
+        .alias('u', 'username')
+        .describe('u', 'Insecurely pass username, only use from scripts that don\'t append to shell history')
+        .string('u')
+        .alias('p', 'password')
+        .describe('p', 'Insecurely pass password, only use from scripts that don\'t append to shell history')
+        .string('p')
+        .alias('f', 'force')
+        .describe('f', 'Force reauthentication, even if authentication is present')
+        .boolean('f')
+        .default('f', false)
+        .group(['u','p','f'],'Login parameters')
+    )
     .argv;
 
 // Query env for settings
@@ -145,6 +177,9 @@ const config : GlobalConfig =  CliApplication.CreateConfig(args);
 var auth = new EpiAuthCli({
     BaseURL: config.getEpiserverURL(),
     input: process.stdin, 
-    output: process.stdout
+    output: process.stdout,
+    username: args.username,
+    password: args.password,
+    force: args.force
 });
 auth.start();

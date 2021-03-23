@@ -7,7 +7,7 @@ exports.CreateConfig = exports.Setup = void 0;
 const url_1 = require("url");
 const EpiEnvOptions_1 = __importDefault(require("./EpiEnvOptions"));
 const Config_1 = __importDefault(require("./Config"));
-const Setup = (yargs, defaultEnv = EpiEnvOptions_1.default.Development) => {
+const Setup = (yargs, defaultEnv = EpiEnvOptions_1.default.Development, name, config) => {
     const envChoices = ['development', 'integration', 'preproduction', 'production'];
     const cfg = yargs
         .alias('e', ['env', 'environment'])
@@ -27,7 +27,12 @@ const Setup = (yargs, defaultEnv = EpiEnvOptions_1.default.Development) => {
         .string('d')
         .alias('i', 'insecure')
         .describe('i', 'Remove all security implied by SSL/TLS by disabling certificate checking in Node.JS - only use when there\'s no alternative.')
-        .boolean('i');
+        .boolean('i')
+        .help('help')
+        .group(['d', 'i', 'e'], 'Optimizely DXP settings')
+        .epilogue(name || "");
+    if (config)
+        config(cfg);
     return cfg;
 };
 exports.Setup = Setup;

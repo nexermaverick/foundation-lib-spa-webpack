@@ -17,8 +17,7 @@ const syncModule = esm('./epi_sync_models.module');
 
 // Create context
 const defaultEnv : EpiEnvOption = EpiEnvOptions.Parse(process.env.NODE_ENV || '', EpiEnvOptions.Development);
-const args : yargs.Arguments<CliApplication.CliArgs> = CliApplication.Setup(yargs(process.argv.slice(2)), defaultEnv)
-        .help("help", "Episerver Command Line Model Synchronization")
+const args : yargs.Arguments<CliApplication.CliArgs> = CliApplication.Setup(yargs(process.argv.slice(2)), defaultEnv, "Episerver Command Line Model Synchronization")
         .argv;
 const config : GlobalConfig =  CliApplication.CreateConfig(args);
 

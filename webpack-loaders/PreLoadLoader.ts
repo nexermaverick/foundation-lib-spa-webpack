@@ -12,13 +12,18 @@ const schema : Schema = {
         },
         extension: {
             type: 'string'
+        },
+        exclude: {
+            type: 'string',
+            required: false
         }
     }
 };
 
 type PreLoadConfig = OptionObject & {
     pattern: string,
-    extension: string
+    extension: string,
+    exclude?: string
 }
 
 /**

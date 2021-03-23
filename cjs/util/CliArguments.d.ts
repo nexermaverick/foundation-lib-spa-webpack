@@ -13,6 +13,8 @@ export declare type CliArgs = {
     domain: CliArgs['d'];
     insecure: CliArgs['i'];
 };
-export declare const Setup: <T extends object = {}>(yargs: yargs.Argv<T>, defaultEnv?: EpiEnvOption) => yargs.Argv<T & CliArgs>;
+declare type ConfigureCallback<T extends object = {}> = (yargs: yargs.Argv<T>) => void;
+declare type SetupFunction = <T extends object = {}>(yargs: yargs.Argv<{}>, defaultEnv?: EpiEnvOption, name?: string, config?: ConfigureCallback<T & CliArgs>) => yargs.Argv<T & CliArgs>;
+export declare const Setup: SetupFunction;
 export declare const CreateConfig: (cliArgs: yargs.Arguments<CliArgs>, overrides?: DotenvParseOutput) => GlobalConfig;
 export default Setup;

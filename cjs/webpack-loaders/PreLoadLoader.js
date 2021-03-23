@@ -15,6 +15,10 @@ const schema = {
         },
         extension: {
             type: 'string'
+        },
+        exclude: {
+            type: 'string',
+            required: false
         }
     }
 };
