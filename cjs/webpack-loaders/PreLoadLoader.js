@@ -17,10 +17,10 @@ const schema = {
             type: 'string'
         },
         exclude: {
-            type: 'string',
-            required: false
+            type: 'string'
         }
-    }
+    },
+    required: ['pattern', 'extension']
 };
 /**
  * Find and replace the @PreLoad annotation within a

@@ -14,10 +14,10 @@ const schema : Schema = {
             type: 'string'
         },
         exclude: {
-            type: 'string',
-            required: false
+            type: 'string'
         }
-    }
+    },
+    required: ['pattern','extension']
 };
 
 type PreLoadConfig = OptionObject & {
