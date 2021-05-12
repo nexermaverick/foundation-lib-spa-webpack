@@ -15,6 +15,7 @@ export declare type TypeDefinitionData = TypeDefinition & {
         Type: string;
     }[];
 };
+declare type internalAuthService = ContentDelivery.IAuthService & ContentDelivery.IAuthTokenProvider;
 /**
  * Episerver Model Synchronization Job
  */
@@ -25,7 +26,7 @@ export declare class EpiModelSync {
     protected _config: GlobalConfig;
     protected _iContentProps: string[];
     protected _api: ContentDelivery.IContentDeliveryAPI_V2;
-    protected _auth: ContentDelivery.IAuthService & ContentDelivery.IAuthTokenProvider;
+    protected _auth: internalAuthService;
     /**
      * Create a new instance of the job
      *

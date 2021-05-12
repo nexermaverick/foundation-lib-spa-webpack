@@ -27,6 +27,15 @@ export type TypeDefinitionData = TypeDefinition & {
     }[]
 }
 
+type internalAuthService = ContentDelivery.IAuthService & ContentDelivery.IAuthTokenProvider;
+function isNetworkErrorResponse(toTest: unknown) : toTest is ContentDelivery.NetworkErrorData
+{
+    if (!toTest) return false;
+    if (typeof(toTest) !== 'object') 
+        return false;
+    return (toTest as ContentDelivery.NetworkErrorData).error && (toTest as ContentDelivery.NetworkErrorData).contentType ? true : false;
+}
+
 /**
  * Episerver Model Synchronization Job
  */
@@ -37,7 +46,7 @@ export class EpiModelSync {
     protected _config : GlobalConfig
     protected _iContentProps : string[] = ["contentLink"]
     protected _api : ContentDelivery.IContentDeliveryAPI_V2;
-    protected _auth : ContentDelivery.IAuthService & ContentDelivery.IAuthTokenProvider;
+    protected _auth : internalAuthService;
 
     /**
      * Create a new instance of the job
@@ -56,7 +65,7 @@ export class EpiModelSync {
             Debug: false,
             EnableExtensions: true
         });
-        this._auth = new ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage.CreateFromUrl(u));
+        this._auth = (new ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage.CreateFromUrl(u))) as internalAuthService;
         this._api.TokenProvider = this._auth;
     }
 
@@ -317,7 +326,6 @@ export class EpiModelSync {
         return StringUtils.SafeModelName(modelName) + 'Props';
     }
 
-
     protected processFieldName(originalName : string) : string
     {
         let processedName = originalName;
@@ -328,7 +336,7 @@ export class EpiModelSync {
     protected _doRequest<T = any>(url: string) : Promise<T | null>
     {
         return this._api.raw<T>(url, { method: 'get' }, false)
-            .then(r => r[0])
+            .then(r => isNetworkErrorResponse(r[0]) ? null : r[0])
             .catch(e => {
                 console.error(`\n\n\x1b[31m  !!! Error while fetching ${ url }: ${ e?.message || e } !!!\x1b[0m`);
                 return null;
