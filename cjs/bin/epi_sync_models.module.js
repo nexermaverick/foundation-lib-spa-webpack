@@ -11,6 +11,13 @@ const url_1 = require("url");
 const spa_core_1 = require("@episerver/spa-core");
 const StringUtils = spa_core_1.Services.String;
 const ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
+function isNetworkErrorResponse(toTest) {
+    if (!toTest)
+        return false;
+    if (typeof (toTest) !== 'object')
+        return false;
+    return toTest.error && toTest.contentType ? true : false;
+}
 /**
  * Episerver Model Synchronization Job
  */
@@ -34,7 +41,7 @@ class EpiModelSync {
             Debug: false,
             EnableExtensions: true
         });
-        this._auth = new spa_core_1.ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage_1.default.CreateFromUrl(u));
+        this._auth = (new spa_core_1.ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage_1.default.CreateFromUrl(u)));
         this._api.TokenProvider = this._auth;
     }
     /**
@@ -282,7 +289,7 @@ class EpiModelSync {
     }
     _doRequest(url) {
         return this._api.raw(url, { method: 'get' }, false)
-            .then(r => r[0])
+            .then(r => isNetworkErrorResponse(r[0]) ? null : r[0])
             .catch(e => {
             console.error(`\n\n\x1b[31m  !!! Error while fetching ${url}: ${(e === null || e === void 0 ? void 0 : e.message) || e} !!!\x1b[0m`);
             return null;
