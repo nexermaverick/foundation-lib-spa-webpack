@@ -32,7 +32,7 @@ export class EpiEnvOptions {
                 output = EpiEnvOptions.Production;
                 break;
         }
-        return output;
+        return output || defaultValue;
     }
 }
 export type EpiEnvOption = "development" | "integration" | "preproduction" | "production"

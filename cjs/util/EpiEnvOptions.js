@@ -28,7 +28,7 @@ class EpiEnvOptions {
                 output = EpiEnvOptions.Production;
                 break;
         }
-        return output;
+        return output || defaultValue;
     }
 }
 exports.EpiEnvOptions = EpiEnvOptions;
