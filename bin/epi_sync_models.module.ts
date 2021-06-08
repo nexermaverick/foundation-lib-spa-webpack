@@ -3,7 +3,7 @@ import path from 'path';
 import { URL } from 'url';
 
 // Import from Spa Core
-import { Services, ContentDelivery } from '@episerver/spa-core';
+import { Services, ContentDelivery } from '@episerver/spa-core/cjs';
 const StringUtils = Services.String;
 
 // Import from webpack

@@ -3,10 +3,7 @@
 // Import native Node.JS libraries
 import readline from 'readline';
 import { URL } from 'url';
-
-// Import episerver libraries through ESM, as they are delivered as ESNext modules
-const esm = require('esm')(module, {});
-const epi = esm('@episerver/spa-core');
+import * as epi from '@episerver/spa-core/cjs';
 
 // Import local classes
 import GlobalConfig from '../util/Config';
@@ -77,8 +74,6 @@ class EpiAuthCli {
     }
 
     async start() {
-        const forceLogin : boolean = this.config.force || false;
-        //console.log(forceLogin);process.exit(0);
         const auth = this.config.force ? false : await this._auth.isAuthenticated().catch((e : Error) => {
             this._rli.write(`\n\n\x1b[31mError while validating authentication status: ${ e.message }\x1b[0m\n\n`);
             this._rli.close();

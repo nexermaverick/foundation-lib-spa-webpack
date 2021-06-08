@@ -1,8 +1,7 @@
 import path from 'path';
 import FormData from 'form-data';
 import fs from 'fs';
-const esm = require('esm')(module, {});
-const epi = esm('@episerver/spa-core');
+import * as epi from '@episerver/spa-core/cjs';
 import ClientAuthStorage from '../ContentDelivery/ClientAuthStorage';
 import { DelegatedPlugin as Plugin, Compiler } from 'webpack';
 import { AxiosRequestConfig } from 'axios';

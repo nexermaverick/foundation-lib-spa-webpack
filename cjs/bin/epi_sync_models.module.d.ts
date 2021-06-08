@@ -1,4 +1,4 @@
-import { ContentDelivery } from '@episerver/spa-core';
+import { ContentDelivery } from '@episerver/spa-core/cjs';
 import GlobalConfig from '../util/Config';
 export declare type TypeOverviewResponse = TypeDefinition[];
 export declare type TypeDefinition = {

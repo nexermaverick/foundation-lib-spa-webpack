@@ -31,9 +31,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const yargs_1 = __importDefault(require("yargs"));
 const EpiEnvOptions_1 = __importDefault(require("../util/EpiEnvOptions"));
 const CliApplication = __importStar(require("../util/CliArguments"));
-// Load main module through ESM
-const esm = require('esm')(module, {});
-const syncModule = esm('./epi_sync_models.module');
+const syncModule = __importStar(require("./epi_sync_models.module"));
 // Create context
 const defaultEnv = EpiEnvOptions_1.default.Parse(process.env.NODE_ENV || '', EpiEnvOptions_1.default.Development);
 const args = CliApplication.Setup(yargs_1.default(process.argv.slice(2)), defaultEnv, "Episerver Command Line Model Synchronization")

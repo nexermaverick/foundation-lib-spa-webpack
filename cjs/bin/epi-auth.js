@@ -35,9 +35,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // Import native Node.JS libraries
 const readline_1 = __importDefault(require("readline"));
 const url_1 = require("url");
-// Import episerver libraries through ESM, as they are delivered as ESNext modules
-const esm = require('esm')(module, {});
-const epi = esm('@episerver/spa-core');
+const epi = __importStar(require("@episerver/spa-core/cjs"));
 const ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
 class EpiAuthCli {
     /**
@@ -76,8 +74,6 @@ class EpiAuthCli {
     }
     start() {
         return __awaiter(this, void 0, void 0, function* () {
-            const forceLogin = this.config.force || false;
-            //console.log(forceLogin);process.exit(0);
             const auth = this.config.force ? false : yield this._auth.isAuthenticated().catch((e) => {
                 this._rli.write(`\n\n\x1b[31mError while validating authentication status: ${e.message}\x1b[0m\n\n`);
                 this._rli.close();

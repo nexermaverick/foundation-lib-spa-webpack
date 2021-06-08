@@ -10,10 +10,7 @@ import yargs from "yargs";
 import GlobalConfig from "../util/Config";
 import EpiEnvOptions, { EpiEnvOption } from "../util/EpiEnvOptions";
 import * as CliApplication from "../util/CliArguments";
-
-// Load main module through ESM
-const esm = require('esm')(module, {});
-const syncModule = esm('./epi_sync_models.module');
+import * as syncModule from './epi_sync_models.module';
 
 // Create context
 const defaultEnv : EpiEnvOption = EpiEnvOptions.Parse(process.env.NODE_ENV || '', EpiEnvOptions.Development);

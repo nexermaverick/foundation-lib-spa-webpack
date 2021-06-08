@@ -8,8 +8,8 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const url_1 = require("url");
 // Import from Spa Core
-const spa_core_1 = require("@episerver/spa-core");
-const StringUtils = spa_core_1.Services.String;
+const cjs_1 = require("@episerver/spa-core/cjs");
+const StringUtils = cjs_1.Services.String;
 const ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
 function isNetworkErrorResponse(toTest) {
     if (!toTest)
@@ -36,12 +36,12 @@ class EpiModelSync {
         this._rootDir = config.getRootDir();
         // Configure Episerver Connection
         const u = new url_1.URL(this._config.getEpiserverURL());
-        this._api = new spa_core_1.ContentDelivery.API_V2({
+        this._api = new cjs_1.ContentDelivery.API_V2({
             BaseURL: u.href,
             Debug: false,
             EnableExtensions: true
         });
-        this._auth = (new spa_core_1.ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage_1.default.CreateFromUrl(u)));
+        this._auth = (new cjs_1.ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage_1.default.CreateFromUrl(u)));
         this._api.TokenProvider = this._auth;
     }
     /**
