@@ -20,7 +20,7 @@ const schema : Schema = {
     required: ['pattern','extension']
 };
 
-type PreLoadConfig = OptionObject & {
+export type PreLoadConfig = OptionObject & {
     pattern: string,
     extension: string,
     exclude?: string
@@ -34,7 +34,7 @@ type PreLoadConfig = OptionObject & {
  * @param   {string}    source  The source prepared by Webpack
  * @returns {string}    The source with the injected preloading code
  */
-function PreLoadLoader (source : string) : string {
+export function PreLoadLoader (source : string) : string {
     // @ts-ignore: This is controlled by Webpack so allowing usage here
     const loaderContext : any = this;
     const options : ReadonlyOptions<PreLoadConfig> = loaderUtils.getOptions(loaderContext) as ReadonlyOptions<PreLoadConfig>;
@@ -95,4 +95,4 @@ function PreLoadLoader (source : string) : string {
     return source;
 }
 
-module.exports = PreLoadLoader;
+export default PreLoadLoader;

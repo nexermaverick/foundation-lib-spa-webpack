@@ -35,7 +35,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // Import native Node.JS libraries
 const readline_1 = __importDefault(require("readline"));
 const url_1 = require("url");
-const epi = __importStar(require("@episerver/spa-core/cjs"));
+const ContentDelivery = __importStar(require("@episerver/spa-core/cjs/Library/ContentDelivery"));
 const ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
 class EpiAuthCli {
     /**
@@ -59,12 +59,12 @@ class EpiAuthCli {
         // Configure AUTH Api
         try {
             const u = new url_1.URL(config.BaseURL);
-            const cd_api = new epi.ContentDelivery.API_V2({
+            const cd_api = new ContentDelivery.API_V2({
                 BaseURL: config.BaseURL,
                 Debug: false,
                 EnableExtensions: true
             });
-            this._auth = new epi.ContentDelivery.DefaultAuthService(cd_api, ClientAuthStorage_1.default.CreateFromUrl(u));
+            this._auth = new ContentDelivery.DefaultAuthService(cd_api, ClientAuthStorage_1.default.CreateFromUrl(u));
         }
         catch (e) {
             this._rli.write(`\n\n\x1b[31mInvalid Episerver URL provided: ${config.BaseURL}\x1b[0m\n\n`);

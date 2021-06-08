@@ -61,7 +61,7 @@ class ClientAuthStorage {
     }
     /**
      *
-     * @param { epi.ContentDelivery.IOAuthSuccessResponse } token The token to store
+     * @param { ContentDelivery.IOAuthSuccessResponse } token The token to store
      * @returns { boolean }
      */
     storeToken(token) {
@@ -84,7 +84,7 @@ class ClientAuthStorage {
         return this.getToken() !== null;
     }
     /**
-     * @returns { epi.ContentDelivery.IOAuthSuccessResponse | null }
+     * @returns { ContentDelivery.IOAuthSuccessResponse | null }
      */
     getToken() {
         if (!this.isStorageFilePathUsable)

@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.EmptyLoader = void 0;
 const loader_utils_1 = __importDefault(require("loader-utils"));
 const schema_utils_1 = require("schema-utils");
 /**
@@ -26,4 +27,5 @@ const EmptyLoader = (source) => {
     }
     return '';
 };
-module.exports = EmptyLoader;
+exports.EmptyLoader = EmptyLoader;
+exports.default = exports.EmptyLoader;

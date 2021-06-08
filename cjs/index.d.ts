@@ -1,22 +1,7 @@
-import _Config from './util/Config';
-import _EpiEnvOptions, { EpiEnvOption as _EpiEnvOption } from './util/EpiEnvOptions';
-import _DeployToEpiserverPlugin, { DeployToEpiserverPluginOptions as _DeployToEpiserverPluginOptions } from './webpack-plugins/DeployToEpiserverPlugin';
-export declare const PreLoadLoaderImpl: any;
-export declare const EmptyLoaderImpl: any;
-export declare const Config: typeof _Config;
-export declare const EpiEnvOptions: typeof _EpiEnvOptions;
-export declare const DeployToEpiserverPlugin: typeof _DeployToEpiserverPlugin;
-export declare type DeployToEpiserverPluginOptions = _DeployToEpiserverPluginOptions;
-export declare type EpiEnvOption = _EpiEnvOption;
 export declare const PreLoadLoader: string;
+export { PreLoadLoader as PreLoadLoaderImpl } from './webpack-loaders/PreLoadLoader';
 export declare const EmptyLoader: string;
-export declare const SpaWebpackAddOn: {
-    PreLoadLoader: string;
-    PreLoadLoaderImpl: any;
-    EmptyLoader: string;
-    EmptyLoaderImpl: any;
-    Config: typeof _Config;
-    EpiEnvOptions: typeof _EpiEnvOptions;
-    DeployToEpiserverPlugin: typeof _DeployToEpiserverPlugin;
-};
-export default SpaWebpackAddOn;
+export { EmptyLoader as EmptyLoaderImpl } from './webpack-loaders/EmptyLoader';
+export { GlobalConfig as Config } from './util/Config';
+export { EpiEnvOptions, EpiEnvOption } from './util/EpiEnvOptions';
+export { DeployToEpiserverPlugin, DeployToEpiserverPluginOptions } from './webpack-plugins/DeployToEpiserverPlugin';

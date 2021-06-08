@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.PreLoadLoader = void 0;
 const loader_utils_1 = __importDefault(require("loader-utils"));
 const schema_utils_1 = require("schema-utils");
 const glob_1 = __importDefault(require("glob"));
@@ -84,4 +85,5 @@ function PreLoadLoader(source) {
     }
     return source;
 }
-module.exports = PreLoadLoader;
+exports.PreLoadLoader = PreLoadLoader;
+exports.default = PreLoadLoader;

@@ -8,8 +8,8 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const url_1 = require("url");
 // Import from Spa Core
-const cjs_1 = require("@episerver/spa-core/cjs");
-const StringUtils = cjs_1.Services.String;
+const ContentDelivery_1 = __importDefault(require("@episerver/spa-core/cjs/Library/ContentDelivery"));
+const Services_1 = require("@episerver/spa-core/cjs/Library/Services");
 const ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
 function isNetworkErrorResponse(toTest) {
     if (!toTest)
@@ -36,12 +36,12 @@ class EpiModelSync {
         this._rootDir = config.getRootDir();
         // Configure Episerver Connection
         const u = new url_1.URL(this._config.getEpiserverURL());
-        this._api = new cjs_1.ContentDelivery.API_V2({
+        this._api = new ContentDelivery_1.default.API_V2({
             BaseURL: u.href,
             Debug: false,
             EnableExtensions: true
         });
-        this._auth = (new cjs_1.ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage_1.default.CreateFromUrl(u)));
+        this._auth = (new ContentDelivery_1.default.DefaultAuthService(this._api, ClientAuthStorage_1.default.CreateFromUrl(u)));
         this._api.TokenProvider = this._auth;
     }
     /**
@@ -260,7 +260,7 @@ class EpiModelSync {
      * @returns {string}
      */
     getModelInterfaceName(modelName) {
-        return StringUtils.SafeModelName(modelName) + 'Data';
+        return Services_1.String.SafeModelName(modelName) + 'Data';
     }
     /**
      * Generate the TypeScript instance name
@@ -270,7 +270,7 @@ class EpiModelSync {
      * @returns {string}
      */
     getModelInstanceName(modelName) {
-        return StringUtils.SafeModelName(modelName) + 'Type';
+        return Services_1.String.SafeModelName(modelName) + 'Type';
     }
     /**
      * Generate the TypeScript interface name
@@ -280,7 +280,7 @@ class EpiModelSync {
      * @return {string}
      */
     getComponentPropertiesInterfaceName(modelName) {
-        return StringUtils.SafeModelName(modelName) + 'Props';
+        return Services_1.String.SafeModelName(modelName) + 'Props';
     }
     processFieldName(originalName) {
         let processedName = originalName;

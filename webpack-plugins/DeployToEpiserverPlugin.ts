@@ -1,7 +1,7 @@
 import path from 'path';
 import FormData from 'form-data';
 import fs from 'fs';
-import * as epi from '@episerver/spa-core/cjs';
+import * as ContentDelivery from '@episerver/spa-core/cjs/Library/ContentDelivery';
 import ClientAuthStorage from '../ContentDelivery/ClientAuthStorage';
 import { DelegatedPlugin as Plugin, Compiler } from 'webpack';
 import { AxiosRequestConfig } from 'axios';
@@ -28,12 +28,12 @@ export class DeployToEpiserverPlugin extends Plugin {
 
         // Configure AUTH Api
         const u = new URL(options.base);
-        this._api = new epi.ContentDelivery.API_V2({
+        this._api = new ContentDelivery.API_V2({
             BaseURL: u.href,
             Debug: false,
             EnableExtensions: true
         });
-        this._auth = new epi.ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage.CreateFromUrl(u));
+        this._auth = new ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage.CreateFromUrl(u));
 
         // Check status
         this._auth.isAuthenticated().catch(() => false).then((authorized : boolean) => this._isAuthorized = authorized);

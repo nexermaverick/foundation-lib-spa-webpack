@@ -35,7 +35,7 @@ exports.DeployToEpiserverPlugin = void 0;
 const path_1 = __importDefault(require("path"));
 const form_data_1 = __importDefault(require("form-data"));
 const fs_1 = __importDefault(require("fs"));
-const epi = __importStar(require("@episerver/spa-core/cjs"));
+const ContentDelivery = __importStar(require("@episerver/spa-core/cjs/Library/ContentDelivery"));
 const ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
 const webpack_1 = require("webpack");
 const url_1 = require("url");
@@ -46,12 +46,12 @@ class DeployToEpiserverPlugin extends webpack_1.DelegatedPlugin {
         this._isAuthorized = false;
         // Configure AUTH Api
         const u = new url_1.URL(options.base);
-        this._api = new epi.ContentDelivery.API_V2({
+        this._api = new ContentDelivery.API_V2({
             BaseURL: u.href,
             Debug: false,
             EnableExtensions: true
         });
-        this._auth = new epi.ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage_1.default.CreateFromUrl(u));
+        this._auth = new ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage_1.default.CreateFromUrl(u));
         // Check status
         this._auth.isAuthenticated().catch(() => false).then((authorized) => this._isAuthorized = authorized);
         // Set options

@@ -1,7 +1,7 @@
 import os from 'os';
 import path from 'path';
 import fs from 'fs';
-import * as epi from '@episerver/spa-core';
+import * as ContentDelivery from '@episerver/spa-core/cjs/Library/ContentDelivery';
 import { URL } from 'url';
 import crypto from 'crypto';
 
@@ -65,10 +65,10 @@ export class ClientAuthStorage {
 
     /**
      * 
-     * @param { epi.ContentDelivery.IOAuthSuccessResponse } token The token to store
+     * @param { ContentDelivery.IOAuthSuccessResponse } token The token to store
      * @returns { boolean }
      */
-    storeToken(token: epi.ContentDelivery.IOAuthSuccessResponse): boolean
+    storeToken(token: ContentDelivery.IOAuthSuccessResponse): boolean
     {
         if (!this.isStorageFilePathUsable) return false;
         try {
@@ -90,9 +90,9 @@ export class ClientAuthStorage {
     }
 
     /**
-     * @returns { epi.ContentDelivery.IOAuthSuccessResponse | null }
+     * @returns { ContentDelivery.IOAuthSuccessResponse | null }
      */
-    getToken(): epi.ContentDelivery.IOAuthSuccessResponse | null
+    getToken(): ContentDelivery.IOAuthSuccessResponse | null
     {
         if (!this.isStorageFilePathUsable) return null;
         try {
