@@ -1,4 +1,4 @@
-import yargs from 'yargs';
+import * as yargs from 'yargs';
 import { URL } from 'url';
 import EpiEnvOptions, { EpiEnvOption } from './EpiEnvOptions';
 import GlobalConfig from './Config';

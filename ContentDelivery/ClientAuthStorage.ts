@@ -1,7 +1,7 @@
 import os from 'os';
 import path from 'path';
 import fs from 'fs';
-import * as ContentDelivery from '@episerver/spa-core/cjs/Library/ContentDelivery';
+import { IAuthStorage, IOAuthSuccessResponse } from '@episerver/spa-core/cjs/Library/ContentDelivery';
 import { URL } from 'url';
 import crypto from 'crypto';
 
@@ -9,9 +9,9 @@ import crypto from 'crypto';
  * Implementation of a basic file storage for the authentication data 
  * for interacting with Episerver
  * 
- * @implements { epi.ContentDelivery.IAuthStorage }
+ * @implements { IAuthStorage }
  */
-export class ClientAuthStorage {
+export class ClientAuthStorage implements IAuthStorage {
     /**
      * The filename where the authorization token will be stored
      * 
@@ -65,10 +65,10 @@ export class ClientAuthStorage {
 
     /**
      * 
-     * @param { ContentDelivery.IOAuthSuccessResponse } token The token to store
+     * @param { IOAuthSuccessResponse } token The token to store
      * @returns { boolean }
      */
-    storeToken(token: ContentDelivery.IOAuthSuccessResponse): boolean
+    storeToken(token: IOAuthSuccessResponse): boolean
     {
         if (!this.isStorageFilePathUsable) return false;
         try {
@@ -90,9 +90,9 @@ export class ClientAuthStorage {
     }
 
     /**
-     * @returns { ContentDelivery.IOAuthSuccessResponse | null }
+     * @returns { IOAuthSuccessResponse | null }
      */
-    getToken(): ContentDelivery.IOAuthSuccessResponse | null
+    getToken(): IOAuthSuccessResponse | null
     {
         if (!this.isStorageFilePathUsable) return null;
         try {

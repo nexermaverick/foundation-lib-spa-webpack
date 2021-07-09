@@ -34,9 +34,10 @@ const CliApplication = __importStar(require("../util/CliArguments"));
 const syncModule = __importStar(require("./epi_sync_models.module"));
 // Create context
 const defaultEnv = EpiEnvOptions_1.default.Parse(process.env.NODE_ENV || '', EpiEnvOptions_1.default.Development);
-const args = CliApplication.Setup(yargs_1.default(process.argv.slice(2)), defaultEnv, "Episerver Command Line Model Synchronization")
-    .argv;
+const instance = CliApplication.Setup(yargs_1.default(process.argv.slice(2)), defaultEnv, "Episerver Command Line Model Synchronization");
+const args = instance.argv;
 const config = CliApplication.CreateConfig(args);
 // Execute
 const sync = new syncModule.EpiModelSync(config);
 sync.run();
+//# sourceMappingURL=epi_sync_models.js.map

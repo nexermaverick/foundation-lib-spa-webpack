@@ -32,9 +32,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeployToEpiserverPlugin = void 0;
-const path_1 = __importDefault(require("path"));
+const path = __importStar(require("path"));
 const form_data_1 = __importDefault(require("form-data"));
-const fs_1 = __importDefault(require("fs"));
+const fs = __importStar(require("fs"));
 const ContentDelivery = __importStar(require("@episerver/spa-core/cjs/Library/ContentDelivery"));
 const ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
 const webpack_1 = require("webpack");
@@ -71,10 +71,10 @@ class DeployToEpiserverPlugin extends webpack_1.DelegatedPlugin {
             else {
                 logger.info('Starting SPA deployment to the configured Episerver instance');
                 logger.status('Resolving file path');
-                var filepath = path_1.default.resolve(that.options.filepath, that.options.filename);
+                var filepath = path.resolve(that.options.filepath, that.options.filename);
                 logger.status(`Building request data for ${filepath}`);
                 const formData = new form_data_1.default();
-                formData.append(that.options.filename, fs_1.default.createReadStream(filepath));
+                formData.append(that.options.filename, fs.createReadStream(filepath));
                 const requestConfig = {
                     method: 'POST',
                     data: formData,
@@ -96,3 +96,4 @@ class DeployToEpiserverPlugin extends webpack_1.DelegatedPlugin {
 }
 exports.DeployToEpiserverPlugin = DeployToEpiserverPlugin;
 exports.default = DeployToEpiserverPlugin;
+//# sourceMappingURL=DeployToEpiserverPlugin.js.map

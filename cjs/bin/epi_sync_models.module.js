@@ -1,14 +1,42 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EpiModelSync = void 0;
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
 const url_1 = require("url");
 // Import from Spa Core
-const ContentDelivery_1 = __importDefault(require("@episerver/spa-core/cjs/Library/ContentDelivery"));
+const ContentDelivery = __importStar(require("@episerver/spa-core/cjs/Library/ContentDelivery"));
 const Services_1 = require("@episerver/spa-core/cjs/Library/Services");
 const ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
 function isNetworkErrorResponse(toTest) {
@@ -32,16 +60,34 @@ class EpiModelSync {
         this._modelDir = 'src/Models/Episerver';
         this._servicePath = 'api/episerver/v3/model';
         this._iContentProps = ["contentLink"];
+        this.iContentStdProps = [
+            {
+                Name: "Name",
+                DisplayName: "Name",
+                Description: "",
+                Type: "LongString"
+            }, {
+                Name: "ContentLink",
+                DisplayName: "Content Link",
+                Description: "",
+                Type: "ContentReference"
+            }, {
+                Name: "ParentLink",
+                DisplayName: "Parent reference",
+                Description: "",
+                Type: "ContentReference"
+            }
+        ];
         this._config = config;
         this._rootDir = config.getRootDir();
         // Configure Episerver Connection
         const u = new url_1.URL(this._config.getEpiserverURL());
-        this._api = new ContentDelivery_1.default.API_V2({
+        this._api = new ContentDelivery.API_V2({
             BaseURL: u.href,
             Debug: false,
             EnableExtensions: true
         });
-        this._auth = (new ContentDelivery_1.default.DefaultAuthService(this._api, ClientAuthStorage_1.default.CreateFromUrl(u)));
+        this._auth = (new ContentDelivery.DefaultAuthService(this._api, ClientAuthStorage_1.default.CreateFromUrl(u)));
         this._api.TokenProvider = this._auth;
     }
     /**
@@ -67,7 +113,46 @@ class EpiModelSync {
             console.log(' - Start creating/updating model definitions');
             r.forEach(model => me.createModelFile(model, modelNames));
             me.createAsyncTypeMapper(modelNames);
+            me.createContentSchema(r);
         }).catch(reason => console.log(reason));
+    }
+    transformPropertyData(dataIn) {
+        return {
+            name: this.processFieldName(dataIn.Name),
+            sourceName: dataIn.Name,
+            displayName: dataIn.DisplayName || dataIn.Name,
+            description: dataIn.Description,
+            type: "Property" + dataIn.Type
+        };
+    }
+    createContentSchema(modelList) {
+        console.log(' - Initializing Schema file generation');
+        const schemaFile = path.join(this.getModelPath(), 'schema.json');
+        const schema = {};
+        Promise.all(modelList.map((model) => __awaiter(this, void 0, void 0, function* () {
+            const modelSchema = {
+                id: model.GUID,
+                name: model.Name,
+                displayName: model.DisplayName || model.Name,
+                description: model.Description,
+                properties: {}
+            };
+            this.iContentStdProps.forEach(x => modelSchema.properties[this.processFieldName(x.Name)] = this.transformPropertyData(x));
+            const modelInfo = yield this._doRequest(this.getServiceUrl(model.GUID));
+            if (modelInfo)
+                modelInfo.Properties.forEach(propertyInfo => modelSchema.properties[this.processFieldName(propertyInfo.Name)] = this.transformPropertyData(propertyInfo));
+            console.log(` - ${model.DisplayName || model.Name} added to schema`);
+            return modelSchema;
+        }))).then(modelSchemaList => {
+            modelSchemaList.forEach(modelSchema => {
+                if (!modelSchema)
+                    return;
+                schema[modelSchema.name] = modelSchema;
+            });
+            fs.writeFile(schemaFile, JSON.stringify(schema, undefined, 4), () => {
+                console.log(' - Schema written to ' + schemaFile);
+            });
+        });
     }
     /**
      * Generate a TypeMapper component which enables loading of the types from Episerver
@@ -77,7 +162,7 @@ class EpiModelSync {
      * @returns {void}
      */
     createAsyncTypeMapper(allItemNames) {
-        const mapperFile = path_1.default.join(this.getModelPath(), 'TypeMapper.ts');
+        const mapperFile = path.join(this.getModelPath(), 'TypeMapper.ts');
         let mapper = "import { Taxonomy, Core, Loaders } from '@episerver/spa-core';\n";
         // allItemNames.forEach(x => mapper += "import {"+this.getModelInstanceName(x)+"} from './"+ this.getModelInterfaceName(x)+"';\n")
         mapper += "\nexport default class TypeMapper extends Loaders.BaseTypeMapper {\n";
@@ -102,8 +187,8 @@ class EpiModelSync {
         mapper += "    });\n";
         mapper += "  }\n";
         mapper += "}\n";
-        fs_1.default.writeFile(mapperFile, mapper, () => {
-            console.log(' - Written type mapper');
+        fs.writeFile(mapperFile, mapper, () => {
+            console.log(' - TypeMapper written to ' + mapperFile);
         });
     }
     /**
@@ -163,9 +248,9 @@ class EpiModelSync {
             });
             iface += "}\n";
             // Write interface
-            const fullTarget = path_1.default.join(me.getModelPath(), fileName);
-            fs_1.default.writeFile(fullTarget, iface, () => {
-                console.log("   - " + interfaceName + " written to " + fullTarget);
+            const fullTarget = path.join(me.getModelPath(), fileName);
+            fs.writeFile(fullTarget, iface, () => {
+                console.log(` - ${typeName.DisplayName || typeName.Name} model definition written to ${fullTarget}`);
             });
         });
     }
@@ -201,9 +286,8 @@ class EpiModelSync {
             case "LinkCollection":
                 return "ContentDelivery.LinkListProperty";
             default:
-                if (allItemNames.includes(typeName)) {
+                if (allItemNames.includes(typeName))
                     return typeName + "Data";
-                }
                 return "ContentDelivery.Property<any> // Original type: " + typeName;
         }
     }
@@ -216,12 +300,12 @@ class EpiModelSync {
     clearModels(keep) {
         console.log(' - Cleaning model directory');
         const modelPath = this.getModelPath();
-        const files = fs_1.default.readdirSync(modelPath);
+        const files = fs.readdirSync(modelPath);
         files.forEach(file => {
-            const name = path_1.default.parse(file).name;
+            const name = path.parse(file).name;
             if (name !== "TypeMapper" && keep && !keep.includes(name)) {
                 console.log('  - Removing old model: ', name);
-                fs_1.default.unlinkSync(path_1.default.join(modelPath, file));
+                fs.unlinkSync(path.join(modelPath, file));
             }
         });
     }
@@ -246,9 +330,9 @@ class EpiModelSync {
         if (!modelDir) {
             throw new Error('Episerver models directory not set');
         }
-        const modelPath = path_1.default.join(this._rootDir, modelDir);
-        if (!fs_1.default.existsSync(modelPath)) {
-            fs_1.default.mkdirSync(modelPath, { "recursive": true });
+        const modelPath = path.join(this._rootDir, modelDir);
+        if (!fs.existsSync(modelPath)) {
+            fs.mkdirSync(modelPath, { "recursive": true });
         }
         return modelPath;
     }
@@ -298,3 +382,4 @@ class EpiModelSync {
 }
 exports.EpiModelSync = EpiModelSync;
 exports.default = EpiModelSync;
+//# sourceMappingURL=epi_sync_models.module.js.map

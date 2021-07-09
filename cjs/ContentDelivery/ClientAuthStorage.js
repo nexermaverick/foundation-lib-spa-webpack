@@ -12,7 +12,7 @@ const crypto_1 = __importDefault(require("crypto"));
  * Implementation of a basic file storage for the authentication data
  * for interacting with Episerver
  *
- * @implements { epi.ContentDelivery.IAuthStorage }
+ * @implements { IAuthStorage }
  */
 class ClientAuthStorage {
     /**
@@ -61,7 +61,7 @@ class ClientAuthStorage {
     }
     /**
      *
-     * @param { ContentDelivery.IOAuthSuccessResponse } token The token to store
+     * @param { IOAuthSuccessResponse } token The token to store
      * @returns { boolean }
      */
     storeToken(token) {
@@ -84,7 +84,7 @@ class ClientAuthStorage {
         return this.getToken() !== null;
     }
     /**
-     * @returns { ContentDelivery.IOAuthSuccessResponse | null }
+     * @returns { IOAuthSuccessResponse | null }
      */
     getToken() {
         if (!this.isStorageFilePathUsable)
@@ -141,3 +141,4 @@ class ClientAuthStorage {
 }
 exports.ClientAuthStorage = ClientAuthStorage;
 exports.default = ClientAuthStorage;
+//# sourceMappingURL=ClientAuthStorage.js.map

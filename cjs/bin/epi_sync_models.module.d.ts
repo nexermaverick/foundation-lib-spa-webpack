@@ -1,4 +1,4 @@
-import ContentDelivery from '@episerver/spa-core/cjs/Library/ContentDelivery';
+import * as ContentDelivery from '@episerver/spa-core/cjs/Library/ContentDelivery';
 import GlobalConfig from '../util/Config';
 export declare type TypeOverviewResponse = TypeDefinition[];
 export declare type TypeDefinition = {
@@ -38,6 +38,25 @@ export declare class EpiModelSync {
      * Run the configuration job
      */
     run(): void;
+    protected readonly iContentStdProps: {
+        Name: string;
+        DisplayName: string;
+        Description: string;
+        Type: string;
+    }[];
+    protected transformPropertyData(dataIn: {
+        Name: string;
+        DisplayName: string;
+        Description: string;
+        Type: string;
+    }): {
+        name: string;
+        sourceName: string;
+        displayName: string;
+        description: string;
+        type: string;
+    };
+    protected createContentSchema(modelList: TypeDefinition[]): void;
     /**
      * Generate a TypeMapper component which enables loading of the types from Episerver
      *

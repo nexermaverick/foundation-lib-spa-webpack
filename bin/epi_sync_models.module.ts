@@ -1,14 +1,16 @@
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import { URL } from 'url';
 
 // Import from Spa Core
-import ContentDelivery from '@episerver/spa-core/cjs/Library/ContentDelivery';
+import * as ContentDelivery from '@episerver/spa-core/cjs/Library/ContentDelivery';
 import { String as StringUtils } from '@episerver/spa-core/cjs/Library/Services';
 
 // Import from webpack
 import GlobalConfig from '../util/Config';
 import ClientAuthStorage from '../ContentDelivery/ClientAuthStorage';
+import { type } from 'os';
+import { string } from 'yargs';
 
 // Definitions
 export type TypeOverviewResponse = TypeDefinition[];
@@ -91,7 +93,70 @@ export class EpiModelSync {
             console.log(' - Start creating/updating model definitions');
             r.forEach(model => me.createModelFile(model, modelNames));
             me.createAsyncTypeMapper(modelNames);
+            me.createContentSchema(r);
         }).catch(reason => console.log(reason));
+    }
+
+    protected readonly iContentStdProps : { Name: string, DisplayName: string, Description: string, Type: string}[] = [
+        {
+            Name: "Name",
+            DisplayName: "Name",
+            Description: "",
+            Type: "LongString"
+        },{
+            Name: "ContentLink",
+            DisplayName: "Content Link",
+            Description: "",
+            Type: "ContentReference"
+        },{
+            Name: "ParentLink",
+            DisplayName: "Parent reference",
+            Description: "",
+            Type: "ContentReference"
+        }
+    ]
+
+    protected transformPropertyData(dataIn: { Name: string, DisplayName: string, Description: string, Type: string}): { name: string, sourceName: string, displayName: string, description: string, type: string }  
+    {
+        return {
+            name: this.processFieldName(dataIn.Name),
+            sourceName: dataIn.Name,
+            displayName: dataIn.DisplayName || dataIn.Name,
+            description: dataIn.Description,
+            type: "Property"+dataIn.Type
+        };
+    }
+
+    protected createContentSchema(modelList: TypeDefinition[]): void
+    {
+        console.log(' - Initializing Schema file generation');
+        const schemaFile = path.join(this.getModelPath(), 'schema.json');
+        const schema : {[name:string]:{id:string,name:string,displayName:string,description:string,properties:{[propertyName:string]:{name:string,sourceName:string,displayName:string,description:string,type:string}}}} = {};
+        Promise.all(modelList.map(async model => {
+            const modelSchema : {id:string,name:string,displayName:string,description:string,properties:{[propertyName:string]:{name:string,sourceName:string,displayName:string,description:string,type:string}}} = {
+                id:          model.GUID,
+                name:        model.Name,
+                displayName: model.DisplayName || model.Name,
+                description: model.Description,
+                properties: {}
+            }
+            
+            this.iContentStdProps.forEach(x => modelSchema.properties[this.processFieldName(x.Name)] = this.transformPropertyData(x));
+            const modelInfo = await this._doRequest<TypeDefinitionData>(this.getServiceUrl(model.GUID));
+            if (modelInfo) 
+                modelInfo.Properties.forEach(propertyInfo => modelSchema.properties[this.processFieldName(propertyInfo.Name)] = this.transformPropertyData(propertyInfo));
+
+            console.log(` - ${model.DisplayName || model.Name} added to schema`);
+            return modelSchema
+        })).then(modelSchemaList => {
+            modelSchemaList.forEach(modelSchema => {
+                if (!modelSchema) return;
+                schema[modelSchema.name] = modelSchema;
+            });
+            fs.writeFile(schemaFile, JSON.stringify(schema, undefined, 4), () => {
+                console.log(' - Schema written to ' + schemaFile);
+            });
+        });
     }
 
     /**
@@ -131,7 +196,7 @@ export class EpiModelSync {
         mapper += "}\n";
 
         fs.writeFile(mapperFile, mapper, () => {
-            console.log(' - Written type mapper');
+            console.log(' - TypeMapper written to ' + mapperFile);
         });
     }
 
@@ -200,7 +265,7 @@ export class EpiModelSync {
             // Write interface
             const fullTarget = path.join(me.getModelPath(), fileName);
             fs.writeFile(fullTarget, iface, () => {
-                console.log("   - " + interfaceName + " written to " + fullTarget);
+                console.log(` - ${ typeName.DisplayName || typeName.Name } model definition written to ${ fullTarget }`);
             });
         });
     }
@@ -238,9 +303,8 @@ export class EpiModelSync {
             case "LinkCollection":
                 return "ContentDelivery.LinkListProperty";
             default:
-                if (allItemNames.includes(typeName)) {
+                if (allItemNames.includes(typeName))
                     return typeName+"Data";
-                }
                 return "ContentDelivery.Property<any> // Original type: "+typeName;
         }
     }

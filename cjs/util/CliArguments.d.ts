@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import yargs from 'yargs';
+import * as yargs from 'yargs';
 import { URL } from 'url';
 import { EpiEnvOption } from './EpiEnvOptions';
 import GlobalConfig from './Config';

@@ -1,6 +1,6 @@
-import path from 'path';
+import * as path from 'path';
 import FormData from 'form-data';
-import fs from 'fs';
+import * as fs from 'fs';
 import * as ContentDelivery from '@episerver/spa-core/cjs/Library/ContentDelivery';
 import ClientAuthStorage from '../ContentDelivery/ClientAuthStorage';
 import { DelegatedPlugin as Plugin, Compiler } from 'webpack';

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 // Import native Node.JS libraries
-import readline from 'readline';
+import * as readline from 'readline';
 import { URL } from 'url';
-import * as ContentDelivery from '@episerver/spa-core/cjs/Library/ContentDelivery';
+import { API_V2, IAuthService, DefaultAuthService } from '@episerver/spa-core/cjs/Library/ContentDelivery';
 
 // Import local classes
 import GlobalConfig from '../util/Config';
@@ -31,9 +31,9 @@ class EpiAuthCli {
 
     /**
      * 
-     * @type { ContentDelivery.IAuthService } auth
+     * @type { IAuthService } auth
      */
-    private _auth : any;
+    private _auth : IAuthService;
 
     private config : EpiAuthCliConfig;
 
@@ -60,12 +60,12 @@ class EpiAuthCli {
         // Configure AUTH Api
         try {
             const u = new URL(config.BaseURL);
-            const cd_api = new ContentDelivery.API_V2({
+            const cd_api = new API_V2({
                 BaseURL: config.BaseURL,
                 Debug: false,
                 EnableExtensions: true
             });
-            this._auth = new ContentDelivery.DefaultAuthService(cd_api, ClientAuthStorage.CreateFromUrl(u));
+            this._auth = new DefaultAuthService(cd_api, ClientAuthStorage.CreateFromUrl(u));
         } catch (e) {
             this._rli.write(`\n\n\x1b[31mInvalid Episerver URL provided: ${ config.BaseURL }\x1b[0m\n\n`);
             this._rli.close();
@@ -163,7 +163,7 @@ const args = CliApplication
         .default('f', false)
         .group(['u','p','f'],'Login parameters')
     )
-    .argv;
+    .argv as yargs.Arguments<CliApplication.CliArgs & LoginArgs>;
 
 // Query env for settings
 const config : GlobalConfig =  CliApplication.CreateConfig(args);

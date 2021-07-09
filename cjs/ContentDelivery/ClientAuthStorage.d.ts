@@ -1,13 +1,13 @@
 /// <reference types="node" />
-import * as ContentDelivery from '@episerver/spa-core/cjs/Library/ContentDelivery';
+import { IAuthStorage, IOAuthSuccessResponse } from '@episerver/spa-core/cjs/Library/ContentDelivery';
 import { URL } from 'url';
 /**
  * Implementation of a basic file storage for the authentication data
  * for interacting with Episerver
  *
- * @implements { epi.ContentDelivery.IAuthStorage }
+ * @implements { IAuthStorage }
  */
-export declare class ClientAuthStorage {
+export declare class ClientAuthStorage implements IAuthStorage {
     /**
      * The filename where the authorization token will be stored
      *
@@ -37,18 +37,18 @@ export declare class ClientAuthStorage {
     clearToken(): boolean;
     /**
      *
-     * @param { ContentDelivery.IOAuthSuccessResponse } token The token to store
+     * @param { IOAuthSuccessResponse } token The token to store
      * @returns { boolean }
      */
-    storeToken(token: ContentDelivery.IOAuthSuccessResponse): boolean;
+    storeToken(token: IOAuthSuccessResponse): boolean;
     /**
      * @returns { boolean }
      */
     hasToken(): boolean;
     /**
-     * @returns { ContentDelivery.IOAuthSuccessResponse | null }
+     * @returns { IOAuthSuccessResponse | null }
      */
-    getToken(): ContentDelivery.IOAuthSuccessResponse | null;
+    getToken(): IOAuthSuccessResponse | null;
     /**
      *
      * @protected

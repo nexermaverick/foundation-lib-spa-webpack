@@ -33,9 +33,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // Import native Node.JS libraries
-const readline_1 = __importDefault(require("readline"));
+const readline = __importStar(require("readline"));
 const url_1 = require("url");
-const ContentDelivery = __importStar(require("@episerver/spa-core/cjs/Library/ContentDelivery"));
+const ContentDelivery_1 = require("@episerver/spa-core/cjs/Library/ContentDelivery");
 const ClientAuthStorage_1 = __importDefault(require("../ContentDelivery/ClientAuthStorage"));
 class EpiAuthCli {
     /**
@@ -45,7 +45,7 @@ class EpiAuthCli {
     constructor(config) {
         this.config = config;
         // Configure CLI Interface
-        this._rli = readline_1.default.createInterface(config.input || process.stdin, config.output || process.stdout);
+        this._rli = readline.createInterface(config.input || process.stdin, config.output || process.stdout);
         this._rli.write(`\n == Episerver CLI Authentication tool (${config.BaseURL}) == \n\n`);
         this._rli.stdoutMuted = false;
         this._rli._writeToOutput = function (stringToWrite) {
@@ -59,12 +59,12 @@ class EpiAuthCli {
         // Configure AUTH Api
         try {
             const u = new url_1.URL(config.BaseURL);
-            const cd_api = new ContentDelivery.API_V2({
+            const cd_api = new ContentDelivery_1.API_V2({
                 BaseURL: config.BaseURL,
                 Debug: false,
                 EnableExtensions: true
             });
-            this._auth = new ContentDelivery.DefaultAuthService(cd_api, ClientAuthStorage_1.default.CreateFromUrl(u));
+            this._auth = new ContentDelivery_1.DefaultAuthService(cd_api, ClientAuthStorage_1.default.CreateFromUrl(u));
         }
         catch (e) {
             this._rli.write(`\n\n\x1b[31mInvalid Episerver URL provided: ${config.BaseURL}\x1b[0m\n\n`);
@@ -163,3 +163,4 @@ var auth = new EpiAuthCli({
     force: args.force
 });
 auth.start();
+//# sourceMappingURL=epi-auth.js.map

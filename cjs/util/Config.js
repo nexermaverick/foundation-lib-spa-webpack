@@ -1,11 +1,30 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GlobalConfig = void 0;
-const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
+const path = __importStar(require("path"));
+const fs = __importStar(require("fs"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const dotenv_expand_1 = __importDefault(require("dotenv-expand"));
 const EpiEnvOptions_1 = __importDefault(require("./EpiEnvOptions"));
@@ -23,7 +42,7 @@ class GlobalConfig {
      */
     constructor(rootDir, localOverrides = {}, envName) {
         this._rootDir = rootDir || process.cwd();
-        if (!fs_1.default.existsSync(this._rootDir)) {
+        if (!fs.existsSync(this._rootDir)) {
             throw new Error('Invalid application root directory');
         }
         this._localOverrides = localOverrides;
@@ -56,16 +75,16 @@ class GlobalConfig {
      * @returns { string }
      */
     getSourceDir(localEnvironment = {}) {
-        return path_1.default.resolve(this.getRootDir(), this.getSourcePath(localEnvironment)).replace(/\\/g, "/");
+        return path.resolve(this.getRootDir(), this.getSourcePath(localEnvironment)).replace(/\\/g, "/");
     }
     getServerDir(localEnvironment = {}) {
-        return path_1.default.resolve(this.getRootDir(), this.getServerPath(localEnvironment)).replace(/\\/g, "/");
+        return path.resolve(this.getRootDir(), this.getServerPath(localEnvironment)).replace(/\\/g, "/");
     }
     getAssetDir(localEnvironment = {}) {
-        return path_1.default.resolve(this.getRootDir(), this.getAssetPath(localEnvironment)).replace(/\\/g, "/");
+        return path.resolve(this.getRootDir(), this.getAssetPath(localEnvironment)).replace(/\\/g, "/");
     }
     getDistDir(localEnvironment = {}) {
-        return path_1.default.resolve(this.getRootDir(), this.getDistPath(localEnvironment)).replace(/\\/g, "/");
+        return path.resolve(this.getRootDir(), this.getDistPath(localEnvironment)).replace(/\\/g, "/");
     }
     /**
      * Override a specific environment variable within this configuration context.
@@ -85,8 +104,8 @@ class GlobalConfig {
     getEnvFiles() {
         let files = [".env", ".env.local", `.env.${this._envName}.local`];
         return files
-            .map(x => path_1.default.join(this._rootDir, x))
-            .filter(x => fs_1.default.existsSync(x) && fs_1.default.statSync(x).isFile())
+            .map(x => path.join(this._rootDir, x))
+            .filter(x => fs.existsSync(x) && fs.statSync(x).isFile())
             .reverse();
     }
     /**
@@ -195,29 +214,29 @@ class GlobalConfig {
      * @returns {object}    The Resolve configuration for Webpack
      */
     getResolveConfig(envOverrides) {
-        const tsConfigFile = path_1.default.resolve(this._rootDir, this.getEnvVariable('TS_CONFIG_FILE', 'tsconfig.json', envOverrides));
+        const tsConfigFile = path.resolve(this._rootDir, this.getEnvVariable('TS_CONFIG_FILE', 'tsconfig.json', envOverrides));
         const alias = {};
-        if (fs_1.default.existsSync(tsConfigFile)) {
+        if (fs.existsSync(tsConfigFile)) {
             console.log('Building resolve configuration from TypeScript config file: ', tsConfigFile);
-            const tsConfig = JSON.parse(fs_1.default.readFileSync(tsConfigFile).toString());
+            const tsConfig = JSON.parse(fs.readFileSync(tsConfigFile).toString());
             var paths = (tsConfig.compilerOptions || {}).paths || {};
             var baseUrl = (tsConfig.compilerOptions || {}).baseUrl || '';
             for (var prefix in paths) {
                 var webpackPrefix = prefix.replace(/[\/\\]\*$/, '');
                 let prefixPath = Array.isArray(paths[prefix]) ? paths[prefix][0] : (typeof (paths[prefix]) === "string" ? paths[prefix] : "");
-                alias[webpackPrefix] = path_1.default.resolve(this._rootDir, baseUrl, prefixPath.replace(/[\/\\]\*$/, ''));
+                alias[webpackPrefix] = path.resolve(this._rootDir, baseUrl, prefixPath.replace(/[\/\\]\*$/, ''));
             }
         }
         else {
-            alias["app"] = path_1.default.resolve(this._rootDir, this.getSourcePath(envOverrides));
-            alias["app.server"] = path_1.default.resolve(this._rootDir, this.getServerPath(envOverrides));
+            alias["app"] = path.resolve(this._rootDir, this.getSourcePath(envOverrides));
+            alias["app.server"] = path.resolve(this._rootDir, this.getServerPath(envOverrides));
         }
         const resolveConfig = {
             alias: alias,
             extensions: ['.js', '.jsx', '.json', '.tsx', '.ts']
         };
         if (this.isEpiserverFormsEnabled()) {
-            const formsDir = path_1.default.resolve(this._rootDir, this.getEpiserverFormsDir(envOverrides));
+            const formsDir = path.resolve(this._rootDir, this.getEpiserverFormsDir(envOverrides));
             resolveConfig.alias["EPiServer.ContentApi.Forms"] = formsDir;
         }
         return resolveConfig;
@@ -253,3 +272,4 @@ class GlobalConfig {
 }
 exports.GlobalConfig = GlobalConfig;
 exports.default = GlobalConfig;
+//# sourceMappingURL=Config.js.map
